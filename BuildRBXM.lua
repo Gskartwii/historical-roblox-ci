@@ -163,7 +163,6 @@ local function GeneratePROPSection(Table)
 		local Type 				= Table.Types[i];
 		local InstancesOfType 	= GetInstancesOfType(Table.Instances, Type);
 		for PropertyName, PropertyData in next, InstancesOfType[1].Properties do
-			print(Type, PropertyName);
 			UncompressedBuf 	= EncodedTypes.EncodeInt32LE(i - 1); -- Type ID
 			UncompressedBuf		= UncompressedBuf .. EncodedTypes.EncodeInt32LE(PropertyName:len()) .. PropertyName; -- Property name
 			UncompressedBuf 	= UncompressedBuf .. string.char(PropertyData[1]) .. EncodePropertyData(InstancesOfType, PropertyName);
