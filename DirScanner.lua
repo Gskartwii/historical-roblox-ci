@@ -1,5 +1,6 @@
 local DirScanner    	= {};
 local FileSystemLib 	= require "lfs";
+local JSONLib			= require "cjson";
 
 local function IsDir(Path)
 	return FileSystemLib.attributes(Path).mode == "directory";
@@ -31,23 +32,21 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
 			if IsDir(Name .. "/" .. File) then
 				local Children 		= {};
 				local TableToFill 	= {};
+				TableToFill.Properties = {Name = {0x1, GetName(File)}};
+				TableToFill.Name 	= GetName(File);
 				if GetFullExtension(File) == ".mod.lua" then
-					TableToFill.Name = GetName(File);
 					TableToFill.Type = "ModuleScript";
 					TableToFill.Children = Children;
 					RecursiveScanDir(Children, Name .. "/" .. File, TableToFill);
 				elseif GetFullExtension(File) == ".loc.lua" then
-					TableToFill.Name = GetName(File);
 					TableToFill.Type = "LocalScript";
 					TableToFill.Children = Children;
 					RecursiveScanDir(Children, Name .. "/" .. File, TableToFill);
 				elseif GetFullExtension(File) == ".lua" then
-					TableToFill.Name = GetName(File);
 					TableToFill.Type = "Script";
 					TableToFill.Children = Children;
 					RecursiveScanDir(Children, Name .. "/" .. File, TableToFill);
 				elseif GetFullExtension(File) == nil then
-					TableToFill.Name = GetName(File);
 					TableToFill.Type = "Folder";
 					TableToFill.Children = Children;
 					RecursiveScanDir(Children, Name .. "/" .. File);
@@ -57,20 +56,28 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
 			else
 				local FileContent 	= io.open(Name .. "/" .. File, "r"):read("*all");
 				if UnderscoreTable and GetName(File) == "_" then
-					UnderscoreTable.Script = FileContent;
+					UnderscoreTable.Properties.Source = {0x1, FileContent};
 				else
 					if GetFullExtension(File) == ".mod.lua" then
-						table.insert(InstanceTree, {Type = "ModuleScript", Name = GetName(File), Children = {}, Script = FileContent});
+						table.insert(InstanceTree, {Type = "ModuleScript", Name = GetName(File), Children = {}, Properties = {Name = {0x1, GetName(File)}, Source = {0x1, FileContent}}});
 					elseif GetFullExtension(File) == ".loc.lua" then
-						table.insert(InstanceTree, {Type = "LocalScript", Name = GetName(File), Children = {}, Script = FileContent});
+						table.insert(InstanceTree, {Type = "LocalScript", Name = GetName(File), Children = {}, Properties = {Name = {0x1, GetName(File)}, Source = {0x1, FileContent}}});
 					elseif GetFullExtension(File) == ".lua" then
-						table.insert(InstanceTree, {Type = "Script", Name = GetName(File), Children = {}, Script = FileContent});
+						table.insert(InstanceTree, {Type = "Script", Name = GetName(File), Children = {}, Properties = {Name = {0x1, GetName(File)}, Source = {0x1, FileContent}}});
 					elseif GetFullExtension(File) == ".RemoteEvent" then
-						table.insert(InstanceTree, {Type = "RemoteEvent", Name = GetName(File), Children = {}});
+						table.insert(InstanceTree, {Type = "RemoteEvent", Name = GetName(File), Children = {}, Properties = FileContent ~= "" and JSONLib.decode(FileContent) or {Name = {0x1, GetName(File)}}});
 					elseif GetFullExtension(File) == ".IntValue" then
-						table.insert(InstanceTree, {Type = "IntValue", Name = GetName(File), Children = {}});
+						table.insert(InstanceTree, {Type = "IntValue", Name = GetName(File), Children = {}, Properties = FileContent ~= "" and JSONLib.decode(FileContent) or {Name = {0x1, GetName(File)}}});
 					elseif GetFullExtension(File) == ".ObjectValue" then
-						table.insert(InstanceTree, {Type = "InstanceTree", Name = GetName(File), Children = {}});
+						table.insert(InstanceTree, {Type = "ObjectValue", Name = GetName(File), Children = {}, Properties = FileContent ~= "" and JSONLib.decode(FileContent) or {Name = {0x1, GetName(File)}}});
+					elseif GetFullExtension(File) == ".ScreenGui" then
+						table.insert(InstanceTree, {Type = "ScreenGui", Name = GetName(File), Children = {}, Properties = FileContent ~= "" and JSONLib.decode(FileContent) or {Name = {0x1, GetName(File)}}});
+					elseif GetFullExtension(File) == ".Frame" then
+						table.insert(InstanceTree, {Type = "Frame", Name = GetName(File), Children = {}, Properties = FileContent ~= "" and JSONLib.decode(FileContent) or {Name = {0x1, GetName(File)}}});
+					elseif GetFullExtension(File) == ".TextLabel" then
+						table.insert(InstanceTree, {Type = "TextLabel", Name = GetName(File), Children = {}, Properties = FileContent ~= "" and JSONLib.decode(FileContent) or {Name = {0x1, GetName(File)}}});
+					elseif GetFullExtension(File) == ".ImageLabel" then
+						table.insert(InstanceTree, {Type = "ImageLabel", Name = GetName(File), Children = {}, Properties = FileContent ~= "" and JSONLib.decode(FileContent) or {Name = {0x1, GetName(File)}}});
 					else
 						print("WARNING: Unknown Extension", GetFullExtension(File), " in ", File);
 					end

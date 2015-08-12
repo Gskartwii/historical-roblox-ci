@@ -1,20 +1,6 @@
 local DirScanner = dofile "DirScanner.lua";
-local Result = DirScanner.ScanDirectory "i:/gv";
+local TableFormatter = dofile "TableFormatter.lua";
+local BuildRBXM	= dofile "BuildRBXM.lua";
+local Result = DirScanner.ScanDirectory "i:/Valkyrie Git";
 
-
-local RecFunction;
-RecFunction = function(Table, Function)
-	for i, v in next, Table do
-		Function(i,v);
-		if v.Children then
-			RecFunction(v.Children, Function)
-		end
-	end
-end;
-
-RecFunction(Result, function(i,v)
-	print("Name", v.Name);
-	print("Type", v.Type);
-	print("Children", #v.Children);
-	print();
-end);
+io.open("t.rbxm", "wb"):write(BuildRBXM.BuildFromTable(TableFormatter.FormatTable(Result)));
