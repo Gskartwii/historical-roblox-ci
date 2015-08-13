@@ -71,7 +71,9 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
 					elseif GetFullExtension(File) == ".lua" then
 						table.insert(InstanceTree, {Type = "Script", Name = GetName(File), Children = {}, Properties = {Name = {0x1, GetName(File)}, Source = {0x1, FileContent}}});
 					else
-						table.insert(InstanceTree, {Type = GetFullExtension(File):sub(2), Name = GetName(File), Children = {}, Properties = FileContent ~= "" and JSONLib.decode(FileContent) or {Name = {0x1, GetName(File)}}});
+						local Properties 		= FileContent ~= "" and JSONLib.decode(FileContent) or {};
+						Properties.Name  		= {0x1, GetName(File)};
+						table.insert(InstanceTree, {Type = GetFullExtension(File):sub(2), Name = GetName(File), Children = {}, Properties = Properties});
 					end
 				end
 			end
