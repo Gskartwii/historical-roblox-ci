@@ -143,7 +143,7 @@ workspace.ServerLoaderHook.Event:connect(function()
 
 	wait();
 
-	game.TestService:DoCommand("ShutdownClient");
+	--game.TestService:DoCommand("ShutdownClient");
 end);
 
 
