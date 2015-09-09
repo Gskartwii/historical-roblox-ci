@@ -6,3 +6,10 @@ Test_Result.bin
 t.rbxm
 Place1.rbxl
 join.ashx
+Credientials.txt
+builds
+branches
+mime.types
+nginx.conf
+nginx.conf.compiled
+logs
