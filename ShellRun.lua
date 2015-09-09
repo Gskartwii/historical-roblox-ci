@@ -1,15 +1,27 @@
+local Bypass = {};
+local function Raw(String)
+	local Dummy = newproxy(false);
+	Bypass[Dummy] = String;
+	return Dummy;
+end
+
 local function Escape(String)
+	if Bypass[String] then 
+		return Bypass[String];
+	end
 	return "'" .. String:gsub("'", "\\'") .. "'";
 end
 
-return function(Command, ...)
+local function Run(Command, ...)
 	local Args = {...};
 	for i = 1, #Args do
 		Args[i] = Escape(Args[i]);
 	end
-	local Handle = io.popen(Command .. " " .. table.concat(Args, " "), "r");
+	local Handle = io.popen(Command .. " " .. table.concat(Args, " ") .. " 2>&1", "r");
 	print(Command .. " " .. table.concat(Args, " "));
 	local Result = Handle:read("*a");
 	Handle:close();
-	return Result;
-end;
+	return "$ " .. Command .. " " .. table.concat(Args, " ") .. "\n" .. Result;
+end
+
+return {Run, Raw};

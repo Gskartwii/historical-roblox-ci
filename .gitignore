@@ -13,3 +13,5 @@ mime.types
 nginx.conf
 nginx.conf.compiled
 logs
+session.cookie
+models.list
