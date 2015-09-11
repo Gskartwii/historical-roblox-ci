@@ -5,6 +5,8 @@ local ModelListParser = require("ModelListParser");
 local ModelBuilder = loadfile("Test.lua");
 local ModelUploader = require("Uploader");
 
+Application:enable "etlua";
+
 Application:get("/", function()
 	return "Welcome to Lapis " .. require("lapis.version")
 end)
@@ -28,7 +30,7 @@ Application:get("/build/:User/:Repo/:Branch", function(Arguments)
 	else
 		Log = Log .. ShellRun("git -C", "branches/" .. BranchID, ShellRaw "pull");
 	end
-	ModelBuilder(BranchID);
+	Log = Log .. ModelBuilder(BranchID);
 
 	local ModelID = ModelUploader(PotentialID, BranchID);
 
@@ -36,7 +38,8 @@ Application:get("/build/:User/:Repo/:Branch", function(Arguments)
 		io.open("models.list", "a"):write(BranchID .. "\t" .. ModelID .. "\n");
 	end
 
-	return Log .. "<br/> The ID IS:" .. ModelID;
+	return {layout = false; render = "empty", content_type = "text/plain"; Log .. "\nThe ID IS:" .. ModelID};
 end);
 
 return Application;
+

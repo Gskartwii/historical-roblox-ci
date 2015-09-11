@@ -56,6 +56,8 @@ end
 
 local function EncodePropertyData(InstancesOfType, PropertyName)
 	local Return 			= "";
+	local Log			= "";
+	local function print(...) Log = Log .. table.concat({...}, "\t") end;
 
 	local PropertyData		= InstancesOfType[1].Properties[PropertyName]
 	local Type 				= PropertyData[1];
@@ -152,11 +154,13 @@ local function EncodePropertyData(InstancesOfType, PropertyName)
 		print("WARNING: Referent " .. PropertyName .. " STUB!");
 	end
 
-	return Return;
+	return Return, Log;
 end
 
 local function GeneratePROPSection(Table)
 	local Return 			= "";
+	local Log			= "";
+	local NewLog;
 	local UncompressedBuf 	;
 
 	for i = 1, Table.UniqueTypes do
@@ -165,12 +169,14 @@ local function GeneratePROPSection(Table)
 		for PropertyName, PropertyData in next, InstancesOfType[1].Properties do
 			UncompressedBuf 	= EncodedTypes.EncodeInt32LE(i - 1); -- Type ID
 			UncompressedBuf		= UncompressedBuf .. EncodedTypes.EncodeInt32LE(PropertyName:len()) .. PropertyName; -- Property name
-			UncompressedBuf 	= UncompressedBuf .. string.char(PropertyData[1]) .. EncodePropertyData(InstancesOfType, PropertyName);
+			local EncodedData, NewLog = EncodePropertyData(InstancesOfType, PropertyName); 
+			UncompressedBuf		= UncompressedBuf .. string.char(PropertyData[1]) .. EncodedData; 
+			Log 			= Log .. NewLog;
 			Return 				= Return .. "PROP" .. EncodedTypes.CompressLZ4(UncompressedBuf);
 		end
 	end
 
-	return Return;
+	return Return, Log;
 end
 
 local function GeneratePRNTSection(Table)
@@ -203,15 +209,17 @@ end
 function BuildRBXM.BuildFromTable(Table)
 	EnumerateInstances(Table.Instances);
 	local Return 		= Constants.Header;
+	local Log;
 	Return 				= Return .. EncodedTypes.EncodeInt32LE(Table.UniqueTypes);
 	Return 				= Return .. EncodedTypes.EncodeInt32LE(Table.UniqueInstances);
 	Return 				= Return .. "\0\0\0\0\0\0\0\0";
 	Return 				= Return .. GenerateINSTHeader(Table);
-	Return 				= Return .. GeneratePROPSection(Table);
-	Return 				= Return .. GeneratePRNTSection(Table);
+	local PROPSection, Log		= GeneratePROPSection(Table);
+	Return	 			= Return .. PROPSection;
+	Return				= Return .. GeneratePRNTSection(Table);
 	Return 				= Return .. Constants.Footer;
 
-	return Return;
+	return Return, Log;
 end
 
 return BuildRBXM;

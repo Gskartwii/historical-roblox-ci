@@ -1,6 +1,6 @@
 local DirScanner    	= {};
 local FileSystemLib 	= require "lfs";
-local JSONLib			= require "cjson";
+local JSONLib		= require "cjson";
 
 local function IsDir(Path)
 	return FileSystemLib.attributes(Path).mode == "directory";
@@ -26,7 +26,20 @@ end
 
 local RecursiveScanDir;
 
+local function SafeDecode(Name, Content)
+	local Return = nil;
+	local Success, Error = pcall(function() Return = JSONLib.decode(Content) end);
+	local DecoderLog = "";
+
+	if not Success then
+		DecoderLog = DecoderLog .. "WARNING: Failed to decode " .. Name .. ": " .. Error .. "\n";
+	end
+
+	return Return or {}, DecoderLog;
+end
+
 RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
+	local Log, NewLog = "";
 	for File in FileSystemLib.dir(Name) do
 		if File:sub(1, 1) ~= "." then -- Avoid ., .. and .git!
 			if IsDir(Name .. "/" .. File) then
@@ -37,19 +50,19 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
 				TableToFill.Children 		= Children;
 				if GetFullExtension(File) == ".mod.lua" then
 					TableToFill.Type 		= "ModuleScript";
-					RecursiveScanDir(Children, Name .. "/" .. File, TableToFill);
+					Log = Log .. RecursiveScanDir(Children, Name .. "/" .. File, TableToFill);
 				elseif GetFullExtension(File) == ".loc.lua" then
 					TableToFill.Type 		= "LocalScript";
-					RecursiveScanDir(Children, Name .. "/" .. File, TableToFill);
+					Log = Log .. RecursiveScanDir(Children, Name .. "/" .. File, TableToFill);
 				elseif GetFullExtension(File) == ".lua" then
 					TableToFill.Type 		= "Script";
-					RecursiveScanDir(Children, Name .. "/" .. File, TableToFill);
+					Log = Log .. RecursiveScanDir(Children, Name .. "/" .. File, TableToFill);
 				elseif GetFullExtension(File) ~= nil then
 					TableToFill.Type 		= GetFullExtension(File):sub(2);
-					RecursiveScanDir(Children, Name .. "/" .. File, TableToFill);
+					Log = Log .. RecursiveScanDir(Children, Name .. "/" .. File, TableToFill);
 				else
 					TableToFill.Type = "Folder";
-					RecursiveScanDir(Children, Name .. "/" .. File);
+					Log = Log .. RecursiveScanDir(Children, Name .. "/" .. File);
 				end
 
 				table.insert(InstanceTree, TableToFill);
@@ -59,7 +72,13 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
 					if GetFullExtension(File):find("%.lua") then
 						UnderscoreTable.Properties.Source = {0x1, FileContent};
 					else
-						local Properties 		= FileContent ~= "" and JSONLib.decode(FileContent) or {Name = {0x1, GetName(File)}};
+						local Properties, NewLog;
+						if FileContent ~= "" then
+							Properties, NewLog	= SafeDecode(Name .. "/" .. File, FileContent);
+						else
+							Properties, NewLog	= {Name = {0x1, GetName(File)}}, "";
+						end
+						Log 				= Log .. NewLog;
 						Properties.Name 		= UnderscoreTable.Properties.Name;
 						UnderscoreTable.Properties = Properties;
 					end
@@ -71,7 +90,13 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
 					elseif GetFullExtension(File) == ".lua" then
 						table.insert(InstanceTree, {Type = "Script", Name = GetName(File), Children = {}, Properties = {Name = {0x1, GetName(File)}, Source = {0x1, FileContent}}});
 					else
-						local Properties 		= FileContent ~= "" and JSONLib.decode(FileContent) or {};
+						local Properties, NewLog;
+						if FileContent ~= "" then
+							Properties, NewLog	= SafeDecode(Name .. "/" .. File, FileContent);
+						else
+							Properties, NewLog	= {Name = {0x1, GetName(File)}}, "";
+						end
+						Log 				= Log .. NewLog;
 						Properties.Name  		= {0x1, GetName(File)};
 						table.insert(InstanceTree, {Type = GetFullExtension(File):sub(2), Name = GetName(File), Children = {}, Properties = Properties});
 					end
@@ -79,12 +104,13 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
 			end
 		end
 	end
+	return Log;
 end
 
 function DirScanner.ScanDirectory(Name)
 	local InstanceTree 	= {};
-	RecursiveScanDir(InstanceTree, Name);
-	return InstanceTree;
+	local Log = RecursiveScanDir(InstanceTree, Name);
+	return InstanceTree, Log;
 end
 
 return DirScanner;
