@@ -25,10 +25,10 @@ Application:get("/build/:User/:Repo/:Branch", function(Arguments)
 	if not PotentialID then
 		PotentialID = 0;
 	
-		Log = Log .. ShellRun("mkdir -p", "branches/" .. BranchID, "builds/" .. RepoID);
-		Log = Log .. ShellRun("git clone", "https://github.com/" .. RepoID, "branches/" .. BranchID, ShellRaw "-b", Arguments.params.Branch); 
+		Log = Log .. ShellRun("mkdir -p", "branches/" .. BranchID .. "/MainModule.mod.lua", "builds/" .. RepoID);
+		Log = Log .. ShellRun("git clone", "https://github.com/" .. RepoID, "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "-b", Arguments.params.Branch); 
 	else
-		Log = Log .. ShellRun("git -C", "branches/" .. BranchID, ShellRaw "pull");
+		Log = Log .. ShellRun("git -C", "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "pull");
 	end
 	Log = Log .. ModelBuilder(BranchID);
 
@@ -38,7 +38,7 @@ Application:get("/build/:User/:Repo/:Branch", function(Arguments)
 		io.open("models.list", "a"):write(BranchID .. "\t" .. ModelID .. "\n");
 	end
 
-	return {layout = false; render = "empty", content_type = "text/plain"; Log .. "\nThe ID IS:" .. ModelID};
+	return {layout = false; render = "empty", content_type = "text/plain"; Log .. "\nID: " .. ModelID};
 end);
 
 return Application;
