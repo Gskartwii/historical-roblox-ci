@@ -15,7 +15,7 @@ Application:get("/build/:User/:Repo/:Branch", function(Arguments)
 	if Arguments.params.User:find("%.") or Arguments.params.Repo:find("%.") or Arguments.params.Branch:find("%.") then
 		return "Not enjoying this at all."
 	end
-	
+
 	local ModelList = ModelListParser("models.list");
 	local RepoID = Arguments.params.User .. "/" .. Arguments.params.Repo;
 	local BranchID = RepoID .. "/" .. Arguments.params.Branch;
@@ -24,13 +24,13 @@ Application:get("/build/:User/:Repo/:Branch", function(Arguments)
 	local Log = "";
 	if not PotentialID then
 		PotentialID = 0;
-	
+
 		Log = Log .. ShellRun("mkdir -p", "branches/" .. BranchID .. "/MainModule.mod.lua", "builds/" .. RepoID);
-		Log = Log .. ShellRun("git clone", "https://github.com/" .. RepoID, "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "-b", Arguments.params.Branch); 
+		Log = Log .. ShellRun("git clone", "https://github.com/" .. RepoID, "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "-b", Arguments.params.Branch);
 	else
 		Log = Log .. ShellRun("git -C", "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "pull");
 	end
-	Log = Log .. ModelBuilder(BranchID);
+	Log = Log .. ModelBuilder("branches/" .. BranchID);
 
 	local ModelID = ModelUploader(PotentialID, BranchID);
 
@@ -42,4 +42,3 @@ Application:get("/build/:User/:Repo/:Branch", function(Arguments)
 end);
 
 return Application;
-
