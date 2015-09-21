@@ -1,4 +1,4 @@
 local Config	= require "lapis.config";
 Config("development", {
-	port	= 999;
+	port	= 9999;
 })

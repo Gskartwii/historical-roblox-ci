@@ -19,7 +19,8 @@ local function Run(Command, ...)
 	end
 	local Handle = io.popen(Command .. " " .. table.concat(Args, " ") .. " 2>&1", "r");
 	print(Command .. " " .. table.concat(Args, " "));
-	local Result = Handle:read("*a");
+	local Result, Err = Handle:read("*a");
+	print(Err);
 	Handle:close();
 	return "$ " .. Command .. " " .. table.concat(Args, " ") .. "\n" .. Result;
 end

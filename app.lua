@@ -4,33 +4,27 @@ local ShellRun, ShellRaw = unpack(require("ShellRun"));
 local ModelListParser = require("ModelListParser");
 local ModelBuilder = loadfile("Test.lua");
 local ModelUploader = require("Uploader");
+local JSONModule = require("cjson");
 
 Application:enable "etlua";
 
 Application:get("/", function()
 	return "Welcome to Lapis " .. require("lapis.version")
-end)
+end);
 
-Application:get("/build/:User/:Repo/:Branch", function(Arguments)
-	if Arguments.params.User:find("%.") or Arguments.params.Repo:find("%.") or Arguments.params.Branch:find("%.") then
-		return "Not enjoying this at all."
-	end
-
+local function AttemptBuild(RepoID, BranchID, BranchName)
 	local ModelList = ModelListParser("models.list");
-	local RepoID = Arguments.params.User .. "/" .. Arguments.params.Repo;
-	local BranchID = RepoID .. "/" .. Arguments.params.Branch;
 	local PotentialID = ModelList[BranchID];
-	table.foreach(ModelList, print);
 	local Log = "";
 	if not PotentialID then
 		PotentialID = 0;
 
 		Log = Log .. ShellRun("mkdir -p", "branches/" .. BranchID .. "/MainModule.mod.lua", "builds/" .. RepoID);
-		Log = Log .. ShellRun("git clone", "https://github.com/" .. RepoID, "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "-b", Arguments.params.Branch);
+		Log = Log .. ShellRun("git clone", "https://github.com/" .. RepoID, "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "-b", BranchName);
 	else
 		Log = Log .. ShellRun("git -C", "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "pull");
 	end
-	Log = Log .. ModelBuilder("branches/" .. BranchID);
+	Log = Log .. ModelBuilder(BranchID);
 
 	local ModelID = ModelUploader(PotentialID, BranchID);
 
@@ -39,6 +33,26 @@ Application:get("/build/:User/:Repo/:Branch", function(Arguments)
 	end
 
 	return {layout = false; render = "empty", content_type = "text/plain"; Log .. "\nID: " .. ModelID};
+
+end;
+
+Application:get("/build/:User/:Repo/:Branch", function(Arguments)
+	if Arguments.params.User:find("%.") or Arguments.params.Repo:find("%.") or Arguments.params.Branch:find("%.") then
+		return "Not enjoying this at all."
+	end
+
+	local RepoID = Arguments.params.User .. "/" .. Arguments.params.Repo;
+	local BranchID = RepoID .. "/" .. Arguments.params.Branch;
+
+	return AttemptBuild(RepoID, BranchID, Arguments.params.Branch);
+end);
+
+Application:post("/push_hook", function(Arguments)
+	ngx.req.read_body();
+	local Body = ngx.req.get_body_data();
+
+	local ParsedBody = JSONModule.decode(Body);
+	return AttemptBuild(ParsedBody.repository.full_name, ParsedBody.repository.full_name .. ParsedBody.ref:sub(11), ParsedBody.ref:sub(12));
 end);
 
 return Application;

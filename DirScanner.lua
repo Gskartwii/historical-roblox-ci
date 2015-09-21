@@ -98,6 +98,7 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
 						end
 						Log 				= Log .. NewLog;
 						Properties.Name  		= {0x1, GetName(File)};
+						print(File);
 						table.insert(InstanceTree, {Type = GetFullExtension(File):sub(2), Name = GetName(File), Children = {}, Properties = Properties});
 					end
 				end
