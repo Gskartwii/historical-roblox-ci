@@ -5,6 +5,7 @@ local ModelListParser = require("ModelListParser");
 local ModelBuilder = loadfile("Test.lua");
 local ModelUploader = require("Uploader");
 local JSONModule = require("cjson");
+local GitHubStatus = require("GitHubStatus");
 
 Application:enable "etlua";
 
@@ -52,7 +53,19 @@ Application:post("/push_hook", function(Arguments)
 	local Body = ngx.req.get_body_data();
 
 	local ParsedBody = JSONModule.decode(Body);
-	return AttemptBuild(ParsedBody.repository.full_name, ParsedBody.repository.full_name .. ParsedBody.ref:sub(11), ParsedBody.ref:sub(12));
+
+        local BuildResult;
+        GitHubStatus(ParsedBody.head_commit.id, ParsedBody.repository.full_name, "pending", "Currently building and upload your model");
+        local Success, Error = pcall(function() BuildResult = AttemptBuild(ParsedBody.repository.full_name, ParsedBody.repository.full_name .. ParsedBody.ref:sub(11), ParsedBody.ref:sub(12)) end);
+
+        if not Success then
+            GitHubStatus(ParsedBody.head_commit.id, ParsedBody.repository.full_name, "error", "The build failed due to an error in the CI");
+            return {layout = false; render = "empty", content_type = "text/plain"; "ERROR: " .. Error};
+        else
+            GitHubStatus(ParsedBody.head_commit.id, ParsedBody.repository.full_name, "success", "The build succeeded");
+        end
+
+        return BuildResult;
 end);
 
 return Application;
