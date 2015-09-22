@@ -17,3 +17,4 @@ session.cookie
 models.list
 [._]*.s[a-w][a-z]
 GitHubToken.txt
+build_logs
