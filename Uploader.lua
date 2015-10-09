@@ -10,7 +10,6 @@ local function BuildRequest(URL, FormData, ExtraHeaders)
 	Request = Request .. "User-Agent: Roblox/WinINet\n"; -- Some pages require this I think
 	Request = Request .. ExtraHeaders .. "\n";
 	Request = Request .. FormData;
-	io.write("\n" .. Request .. "\n");
 
 	return Request;
 end
@@ -22,7 +21,6 @@ local function HTTPRequestSSL(URL, FormData, ExtraHeaders)
 	Socket:dohandshake();
 	Socket:send(BuildRequest(URL, FormData, ExtraHeaders));
 	local Response = Socket:receive("*a");
-	io.write("\n" .. Response .. "\n");
 	Socket:close();
 	return Response;
 end
@@ -32,7 +30,6 @@ local function HTTPRequest(URL, FormData, ExtraHeaders)
 	Socket:connect("www.roblox.com", 80);
 	Socket:send(BuildRequest(URL, FormData, ExtraHeaders));
 	local Response = Socket:receive("*a");
-	io.write("\n" .. Response .. "\n");
 	Socket:close();
 	return Response;
 end

@@ -3,10 +3,11 @@ local BranchName = ...;
 local DirScanner = dofile "DirScanner.lua";
 local TableFormatter = dofile "TableFormatter.lua";
 local BuildRBXM	= dofile "BuildRBXM.lua";
-local Result, Log = DirScanner.ScanDirectory(BranchName);
+local Result, Log = DirScanner.ScanDirectory("branches/" .. BranchName);
 local StudioManager = dofile "StudioManager.lua";
 
 local Handle, Err = io.open("builds/" .. BranchName .. ".rbxm", "w");
+print(Err);
 local Build, BuilderLog = BuildRBXM.BuildFromTable(TableFormatter.FormatTable(Result));
 print("LOG", Log);
 Handle:write(Build);
