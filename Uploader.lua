@@ -41,11 +41,11 @@ end
 local function Login()
 	local LineReader = io.lines("Credientials.txt");
 	local Username, Password = LineReader(), LineReader();
-	
+
 	local Result = HTTPRequestSSL("https://www.roblox.com/Services/Secure/LoginService.asmx/ValidateLogin", ('{"userName": "%s","password":"%s","isCaptchaOn":false,"challenge":"","captchaResponse":""}'):format(Username, Password), "X-Requested-With: XMLHttpRequest\nContent-Type: application/json\nAccept-Encoding: gzip\n");
 
 	local SessionCookie = Result:match("(%.ROBLOSECURITY=.-);");
-	
+
 	local SessionFile, Error = io.open("session.cookie", "w");
 	if not SessionFile then error(Error); end
 	SessionFile:write(SessionCookie);
@@ -62,14 +62,12 @@ Upload = function(Data, ID, Name, SessionCookie, Force)
 			error("ROBLOX LOGIN FAILED! Please contact gskw. Remember to include the time this happened at.");
 		end
 		print("Update .ROBLOSECURITY");
-		return Upload(Data, ID, Name, Login(), true); 
+		return Upload(Data, ID, Name, Login(), true);
 	end
 	return StripHeaders(Result);
 end
 
 return function(ID, BranchName)
 	local ModelID = Upload(io.open("builds/" .. BranchName .. ".rbxm"):read("*all"), ID, BranchName, io.open("session.cookie", "r"):read("*all"));
-
-	local AssetIDResult = HTTPRequest("/redirect-item?avid=" .. ModelID, "", "");
-	return tonumber(AssetIDResult:match("Location: /.-id=(%d*)"));
+	return ModelID;
 end;

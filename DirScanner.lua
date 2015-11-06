@@ -32,7 +32,7 @@ local function SafeDecode(Name, Content)
 	local DecoderLog = "";
 
 	if not Success then
-		DecoderLog = DecoderLog .. "WARNING: Failed to decode " .. Name .. ": " .. Error .. "\n";
+		DecoderLog = DecoderLog .. "\1WARNING: Failed to decode " .. Name .. ": " .. Error .. "\n"; -- 0x1 = Warning indicator
 	end
 
 	return Return or {}, DecoderLog;

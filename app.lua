@@ -77,6 +77,9 @@ Application:post("/push_hook", function(Arguments)
     if not Success then
         GitHubStatus(ParsedBody.head_commit.id, ParsedBody.repository.full_name, "error", "The build failed due to an error in the CI");
         return {layout = false; render = "empty", content_type = "text/plain"; "ERROR: " .. Error};
+    elseif BuildResult:find("\1") then
+        io.open("build_logs/" .. CommitID .. ".log", "w"):write(BuildResult);
+        GitHubStatus(ParsedBody.head_commit.id, ParsedBody.repository.full_name, "failure", "The build failed due to an error in the repository", "http://gskw.noip.me:9999/build_log/" .. CommitID);
     else
         io.open("build_logs/" .. CommitID .. ".log", "w"):write(BuildResult);
         GitHubStatus(ParsedBody.head_commit.id, ParsedBody.repository.full_name, "success", "The build succeeded", "http://gskw.noip.me:9999/build_log/" .. CommitID);

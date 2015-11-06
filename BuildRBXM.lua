@@ -57,7 +57,7 @@ end
 local function EncodePropertyData(InstancesOfType, PropertyName)
 	local Return 			= "";
 	local Log			= "";
-	local function print(...) Log = Log .. table.concat({...}, "\t") end;
+	local function print(...) Log = Log .. table.concat({...}, "\t") .. "\1\n" end; -- 0x1 = Failure indicator
 
 	local PropertyData		= InstancesOfType[1].Properties[PropertyName]
 	local Type 				= PropertyData[1];
