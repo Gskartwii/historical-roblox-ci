@@ -101,4 +101,8 @@ Application:get("/build_log/:CommitID", function(Arguments)
     return "<pre>" .. io.open("build_logs/" .. Arguments.params.CommitID .. ".log", "r"):read("*all") .. "</pre>";
 end);
 
+Application:get("/models", function()
+    return "<pre>" .. io.open("models.list"):read("*all") .. "</pre>";
+end);
+
 return Application;
