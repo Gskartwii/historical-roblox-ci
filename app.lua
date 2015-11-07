@@ -88,7 +88,7 @@ Application:post("/push_hook", function(Arguments)
 
     local ModelID = AttemptUpload(BranchID);
 
-    RobloxStatus("CI status update: " .. ParsedBody.pusher.name .. " pushed " .. #ParsedBody.commits .. " commits to " .. BranchName);
+    --RobloxStatus("CI status update: " .. ParsedBody.pusher.name .. " pushed " .. #ParsedBody.commits .. " commits to " .. BranchName);
 
     return {layout = false; render = "empty"; content_type = "text/plain"; BuildResult};
 end);
