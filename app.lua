@@ -6,6 +6,7 @@ local ModelBuilder = loadfile("Test.lua");
 local ModelUploader = require("Uploader");
 local JSONModule = require("cjson");
 local GitHubStatus = require("GitHubStatus");
+local RobloxStatus = require("RobloxStatus");
 
 Application:enable "etlua";
 
@@ -86,6 +87,8 @@ Application:post("/push_hook", function(Arguments)
     end
 
     local ModelID = AttemptUpload(BranchID);
+
+    RobloxStatus("CI status update: " .. ParsedBody.pusher.name .. " pushed " .. #ParsedBody.commits .. " commits to " .. BranchName);
 
     return {layout = false; render = "empty"; content_type = "text/plain"; BuildResult};
 end);
