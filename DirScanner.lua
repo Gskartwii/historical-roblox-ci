@@ -84,15 +84,13 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
 						UnderscoreTable.Properties = Properties;
 					end
 				else
-					if CurrentFileExtension == ".md" then
-						-- Escape; skip
-					elseif CurrentFileExtension == ".mod.lua" then
+				    if CurrentFileExtension == ".mod.lua" then
 						table.insert(InstanceTree, {Type = "ModuleScript", Name = GetName(File), Children = {}, Properties = {Name = {0x1, GetName(File)}, Source = {0x1, FileContent}}});
 					elseif CurrentFileExtension == ".loc.lua" then
 						table.insert(InstanceTree, {Type = "LocalScript", Name = GetName(File), Children = {}, Properties = {Name = {0x1, GetName(File)}, Source = {0x1, FileContent}}});
 					elseif CurrentFileExtension == ".lua" then
 						table.insert(InstanceTree, {Type = "Script", Name = GetName(File), Children = {}, Properties = {Name = {0x1, GetName(File)}, Source = {0x1, FileContent}}});
-					else
+					elseif CurrentFileExtension ~= ".md" then
 						local Properties, NewLog;
 						if FileContent ~= "" then
 							Properties, NewLog	= SafeDecode(Name .. "/" .. File, FileContent);
@@ -101,7 +99,6 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
 						end
 						Log 				= Log .. NewLog;
 						Properties.Name  		= {0x1, GetName(File)};
-						print(File);
 						table.insert(InstanceTree, {Type = CurrentFileExtension:sub(2), Name = GetName(File), Children = {}, Properties = Properties});
 					end
 				end
