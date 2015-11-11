@@ -42,23 +42,24 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
 	local Log, NewLog = "";
 	for File in FileSystemLib.dir(Name) do
 		if File:sub(1, 1) ~= "." then -- Avoid ., .. and .git!
+			local CurrentFileExtension = GetFullExtension(File);
 			if IsDir(Name .. "/" .. File) then
 				local Children 				= {};
 				local TableToFill 			= {};
 				TableToFill.Properties 		= {Name = {0x1, GetName(File)}};
 				TableToFill.Name 			= GetName(File);
 				TableToFill.Children 		= Children;
-				if GetFullExtension(File) == ".mod.lua" then
+				if CurrentFileExtension == ".mod.lua" then
 					TableToFill.Type 		= "ModuleScript";
 					Log = Log .. RecursiveScanDir(Children, Name .. "/" .. File, TableToFill);
-				elseif GetFullExtension(File) == ".loc.lua" then
+				elseif CurrentFileExtension == ".loc.lua" then
 					TableToFill.Type 		= "LocalScript";
 					Log = Log .. RecursiveScanDir(Children, Name .. "/" .. File, TableToFill);
-				elseif GetFullExtension(File) == ".lua" then
+				elseif CurrentFileExtension == ".lua" then
 					TableToFill.Type 		= "Script";
 					Log = Log .. RecursiveScanDir(Children, Name .. "/" .. File, TableToFill);
-				elseif GetFullExtension(File) ~= nil then
-					TableToFill.Type 		= GetFullExtension(File):sub(2);
+				elseif CurrentFileExtension ~= nil then
+					TableToFill.Type 		= CurrentFileExtension:sub(2);
 					Log = Log .. RecursiveScanDir(Children, Name .. "/" .. File, TableToFill);
 				else
 					TableToFill.Type = "Folder";
@@ -69,7 +70,7 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
 			else
 				local FileContent 	= io.open(Name .. "/" .. File, "r"):read("*all");
 				if UnderscoreTable and GetName(File) == "_" then
-					if GetFullExtension(File):find("%.lua") then
+					if CurrentFileExtension:find("%.lua") then
 						UnderscoreTable.Properties.Source = {0x1, FileContent};
 					else
 						local Properties, NewLog;
@@ -83,11 +84,13 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
 						UnderscoreTable.Properties = Properties;
 					end
 				else
-					if GetFullExtension(File) == ".mod.lua" then
+					if CurrentFileExtension == ".md" then
+						-- Escape; skip
+					elseif CurrentFileExtension == ".mod.lua" then
 						table.insert(InstanceTree, {Type = "ModuleScript", Name = GetName(File), Children = {}, Properties = {Name = {0x1, GetName(File)}, Source = {0x1, FileContent}}});
-					elseif GetFullExtension(File) == ".loc.lua" then
+					elseif CurrentFileExtension == ".loc.lua" then
 						table.insert(InstanceTree, {Type = "LocalScript", Name = GetName(File), Children = {}, Properties = {Name = {0x1, GetName(File)}, Source = {0x1, FileContent}}});
-					elseif GetFullExtension(File) == ".lua" then
+					elseif CurrentFileExtension == ".lua" then
 						table.insert(InstanceTree, {Type = "Script", Name = GetName(File), Children = {}, Properties = {Name = {0x1, GetName(File)}, Source = {0x1, FileContent}}});
 					else
 						local Properties, NewLog;
@@ -99,7 +102,7 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
 						Log 				= Log .. NewLog;
 						Properties.Name  		= {0x1, GetName(File)};
 						print(File);
-						table.insert(InstanceTree, {Type = GetFullExtension(File):sub(2), Name = GetName(File), Children = {}, Properties = Properties});
+						table.insert(InstanceTree, {Type = CurrentFileExtension:sub(2), Name = GetName(File), Children = {}, Properties = Properties});
 					end
 				end
 			end
