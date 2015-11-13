@@ -7,6 +7,7 @@ local ModelUploader = require("Uploader");
 local JSONModule = require("cjson");
 local GitHubStatus = require("GitHubStatus");
 local RobloxStatus = require("RobloxStatus");
+local ApplyGitInformation = require("GitInfo");
 
 Application:enable "etlua";
 
@@ -72,6 +73,8 @@ Application:post("/push_hook", function(Arguments)
     if BranchID:find("%.") or CommitID:find("%.") then
         return "Nice try. Very nice.";
     end
+
+    ApplyGitInformation(BranchID, ParsedBody.head_commit.id, ParsedBody.head_commit.message, ParsedBody.pusher.name);
 
     local Success, Error = pcall(function() BuildResult = AttemptBuild(RepoID, BranchID, BranchName); end);
 
