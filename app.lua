@@ -84,11 +84,8 @@ Application:post("/push_hook", function(Arguments)
     else
         io.open("build_logs/" .. CommitID .. ".log", "w"):write(BuildResult);
         GitHubStatus(ParsedBody.head_commit.id, ParsedBody.repository.full_name, "success", "The build succeeded", "http://gskw.noip.me:9999/build_log/" .. CommitID);
+        local ModelID = AttemptUpload(BranchID);
     end
-
-    local ModelID = AttemptUpload(BranchID);
-
-    --RobloxStatus("CI status update: " .. ParsedBody.pusher.name .. " pushed " .. #ParsedBody.commits .. " commits to " .. BranchName);
 
     return {layout = false; render = "empty"; content_type = "text/plain"; BuildResult};
 end);
