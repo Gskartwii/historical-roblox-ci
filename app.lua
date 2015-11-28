@@ -75,9 +75,9 @@ Application:post("/push_hook", function(Arguments)
         return "Nice try. Very nice.";
     end
 
-    ApplyGitInformation(BranchID, ParsedBody.head_commit.id, ParsedBody.head_commit.message, ParsedBody.pusher.name);
-
     local Success, Error = pcall(function() BuildResult = AttemptBuild(RepoID, BranchID, BranchName); end);
+
+    ApplyGitInformation(BranchID, ParsedBody.head_commit.id, ParsedBody.head_commit.message, ParsedBody.pusher.name);
 
     if not Success then
         GitHubStatus(ParsedBody.head_commit.id, ParsedBody.repository.full_name, "error", "The build failed due to an error in the CI");
