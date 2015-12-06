@@ -78,8 +78,8 @@ local function ReactToWebhook(RepoID, BranchID, BranchName, CommitID, CommitMess
         GitHubStatus(CommitID, RepoID, "failure", "The build failed due to an error in the repository", "https://gskw.dedyn.io:444/build_log/" .. CommitID);
     else
         io.open("build_logs/" .. CommitID .. ".log", "w"):write(BuildResult);
-        GitHubStatus(CommitID, RepoID, "success", "The build succeeded", "https://gskw.dedyn.io:444/build_log/" .. CommitID);
         local ModelID = AttemptUpload(BranchID);
+        GitHubStatus(CommitID, RepoID, "success", "The build succeeded", "https://gskw.dedyn.io:444/build_log/" .. CommitID);
     end
 
     return {layout = false; render = "empty"; content_type = "text/plain"; BuildResult};
