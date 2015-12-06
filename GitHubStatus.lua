@@ -3,7 +3,7 @@ local JSONModule = require "cjson";
 
 return function(SHA, RepoID, State, Description, LogURL)
      print("GitHub status", ({LapisHTTP.simple{
-        url     = "https://api.github.com/repos/" .. RepoID .. "/statuses/" .. SHA;
+        url     = "https://api.github.com/repos/ValkyrieRBXL/ValkyrieFramework/statuses/" .. SHA;
         method  = "POST";
         body    = JSONModule.encode{state = State; context = "continuous-integration/valkyrie", description = Description, target_url = LogURL};
         headers = {
