@@ -84,7 +84,9 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
 						UnderscoreTable.Properties = Properties;
 					end
 				else
-				    if CurrentFileExtension == ".mod.lua" then
+                    if CurrentFileExtension == nil then
+                        Log = Log .. "\1WARNING: No file extension: " .. Name .. "/" .. File;
+                    elseif CurrentFileExtension == ".mod.lua" then
 						table.insert(InstanceTree, {Type = "ModuleScript", Name = GetName(File), Children = {}, Properties = {Name = {0x1, GetName(File)}, Source = {0x1, FileContent}}});
 					elseif CurrentFileExtension == ".loc.lua" then
 						table.insert(InstanceTree, {Type = "LocalScript", Name = GetName(File), Children = {}, Properties = {Name = {0x1, GetName(File)}, Source = {0x1, FileContent}}});
