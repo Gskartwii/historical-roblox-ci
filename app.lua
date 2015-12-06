@@ -70,7 +70,8 @@ local function ReactToWebhook(RepoID, BranchID, BranchName, CommitID, CommitMess
     ApplyGitInformation(BranchID, CommitID, CommitMessage, CommitPusher);
 
     if not Success then
-        GitHubStatus(CommitID, RepoID, "error", "The build failed due to an error in the CI");
+        GitHubStatus(CommitID, RepoID, "error", "The build failed due to an error in the CI", "https://gskw.dedyn.io:444/build_log/" .. CommitID);
+        io.open("build_logs/" .. CommitID .. ".log", "w"):write(Error);
         return {layout = false; render = "empty", content_type = "text/plain"; "ERROR: " .. Error};
     elseif BuildResult:find("\1") then
         io.open("build_logs/" .. CommitID .. ".log", "w"):write(BuildResult);
