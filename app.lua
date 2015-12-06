@@ -57,19 +57,9 @@ Application:get("/build/:User/:Repo/:Branch", function(Arguments)
     return AttemptBuild(RepoID, BranchID, Arguments.params.Branch);
 end);
 
-Application:post("/push_hook", function(Arguments)
-    ngx.req.read_body();
-    local Body = ngx.req.get_body_data();
-
-    local ParsedBody = JSONModule.decode(Body);
-
+local function ReactToWebhook(RepoID, BranchID, BranchName, CommitID, CommitMessage, CommitPusher)
     local BuildResult;
-    GitHubStatus(ParsedBody.head_commit.id, ParsedBody.repository.full_name, "pending", "Currently building and upload your model");
-
-    local RepoID = ParsedBody.repository.full_name;
-    local BranchID = ParsedBody.repository.full_name .. ParsedBody.ref:sub(11);
-    local BranchName = ParsedBody.ref:sub(12);
-    local CommitID = ParsedBody.head_commit.id;
+    GitHubStatus(CommitID, RepoID, "pending", "Currently building and upload your model");
 
     if BranchID:find("%.") or CommitID:find("%.") then
         return "Nice try. Very nice.";
@@ -77,22 +67,42 @@ Application:post("/push_hook", function(Arguments)
 
     local Success, Error = pcall(function() BuildResult = AttemptBuild(RepoID, BranchID, BranchName); end);
 
-    ApplyGitInformation(BranchID, ParsedBody.head_commit.id, ParsedBody.head_commit.message, ParsedBody.pusher.name);
+    ApplyGitInformation(BranchID, CommitID, CommitMessage, CommitPusher);
 
     if not Success then
-        GitHubStatus(ParsedBody.head_commit.id, ParsedBody.repository.full_name, "error", "The build failed due to an error in the CI");
+        GitHubStatus(CommitID, RepoID, "error", "The build failed due to an error in the CI");
         return {layout = false; render = "empty", content_type = "text/plain"; "ERROR: " .. Error};
     elseif BuildResult:find("\1") then
         io.open("build_logs/" .. CommitID .. ".log", "w"):write(BuildResult);
-        GitHubStatus(ParsedBody.head_commit.id, ParsedBody.repository.full_name, "failure", "The build failed due to an error in the repository", "http://gskw.noip.me:9999/build_log/" .. CommitID);
+        GitHubStatus(CommitID, RepoID, "failure", "The build failed due to an error in the repository", "https://gskw.dedyn.io:444/build_log/" .. CommitID);
     else
         io.open("build_logs/" .. CommitID .. ".log", "w"):write(BuildResult);
-        GitHubStatus(ParsedBody.head_commit.id, ParsedBody.repository.full_name, "success", "The build succeeded", "http://gskw.noip.me:9999/build_log/" .. CommitID);
+        GitHubStatus(CommitID, RepoID, "success", "The build succeeded", "https://gskw.dedyn.io:444/build_log/" .. CommitID);
         local ModelID = AttemptUpload(BranchID);
     end
 
     return {layout = false; render = "empty"; content_type = "text/plain"; BuildResult};
+end
+
+Application:post("/push_hook", function(Arguments)
+    ngx.req.read_body();
+    local Body = ngx.req.get_body_data();
+
+    local ParsedBody    = JSONModule.decode(Body);
+    local RepoID        = ParsedBody.repository.full_name;
+    local BranchID      = ParsedBody.repository.full_name .. ParsedBody.ref:sub(11);
+    local BranchName    = ParsedBody.ref:sub(12);
+    local CommitID      = ParsedBody.head_commit.id;
+    local CommitMessage = ParsedBody.head_commit.message;
+    local CommitPusher  = ParsedBody.pusher.name;
+
+    return ReactToWebhook(RepoID, BranchID, BranchName, CommitID, CommitMessage, CommitPusher);
 end);
+
+Application:post("/pull_hook", function(Arguments)
+
+end);
+
 
 Application:get("/build_log/:CommitID", function(Arguments)
     if Arguments.params.CommitID:find("%.") then
