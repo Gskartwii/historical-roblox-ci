@@ -27,7 +27,7 @@ local function AttemptBuild(RepoID, BranchID, BranchName)
     end
     Log = Log .. ShellRun("git -C", "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "pull");
     Log = Log .. ShellRun("git -C", "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "reset --hard");
-    Log = Log .. ModelBuilder(BranchID);
+    Log = Log .. ModelBuilder("branches/" .. BranchID, "builds/" .. BranchID .. ".rbxm");
 
     return Log;
 end;

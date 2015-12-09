@@ -1,12 +1,12 @@
 #!/usr/bin/env luajit
-local BranchName = ...;
+local Input, Output = ...;
 local DirScanner = dofile "DirScanner.lua";
 local TableFormatter = dofile "TableFormatter.lua";
 local BuildRBXM	= dofile "BuildRBXM.lua";
-local Result, Log = DirScanner.ScanDirectory("branches/" .. BranchName);
+local Result, Log = DirScanner.ScanDirectory(Input);
 local StudioManager = dofile "StudioManager.lua";
 
-local Handle, Err = io.open("builds/" .. BranchName .. ".rbxm", "w");
+local Handle, Err = io.open(Output, "w");
 print(Err);
 local Build, BuilderLog = BuildRBXM.BuildFromTable(TableFormatter.FormatTable(Result));
 print("LOG", Log);
