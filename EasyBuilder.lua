@@ -1,5 +1,6 @@
-#!/usr/bin/env luajit
+#!/usr/bin/env lua
 local Input, Output = ...;
+print(Input, Output);
 local DirScanner = dofile "DirScanner.lua";
 local TableFormatter = dofile "TableFormatter.lua";
 local BuildRBXM	= dofile "BuildRBXM.lua";
