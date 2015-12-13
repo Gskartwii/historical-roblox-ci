@@ -14,7 +14,7 @@ end
 local function GetFullExtension(Path)
 	local PathLess		= StripPath(Path);
 
-	local ExtensionPos 	= ({PathLess:find("%.")})[1];
+	local ExtensionPos 	= ({PathLess:find("%.", 2)})[1];
 	return ExtensionPos and PathLess:sub(ExtensionPos) or nil;
 end
 
