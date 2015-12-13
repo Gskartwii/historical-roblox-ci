@@ -18,9 +18,7 @@ local function Run(Command, ...)
 		Args[i] = Escape(Args[i]);
 	end
 	local Handle = io.popen(Command .. " " .. table.concat(Args, " ") .. " 2>&1", "r");
-	print(Command .. " " .. table.concat(Args, " "));
 	local Result, Err = Handle:read("*a");
-	print(Err);
 	Handle:close();
 	return "$ " .. Command .. " " .. table.concat(Args, " ") .. "\n" .. Result;
 end

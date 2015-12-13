@@ -48,7 +48,6 @@ local function DataRequest(URL, FormData, ExtraHeaders)
 	Socket:connect("data.roblox.com", 80);
 	Socket:send(BuildRequest(URL, FormData, ExtraHeaders, "data.roblox.com"));
 	local Response = Socket:receive("*a");
-    print(Response);
     return Response;
 end
 
@@ -67,6 +66,7 @@ local function Login()
 	local SessionFile, Error = io.open("session.cookie", "w");
 	if not SessionFile then error(Error); end
 	SessionFile:write(SessionCookie);
+    SessionFile:close();
 
 	return SessionCookie;
 end

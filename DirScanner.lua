@@ -42,26 +42,30 @@ local IgnoreRules = {};
 
 local function ParseIgnoreRules(Name)
     local File, Err = io.open(Name, "r");
+    print("Parser", Err);
     if not File then
-        return {Extensions = {}, Files = {}};
+        return {Extensions = {[".md"] = true}, Files = {["."] = true, [".."] = true, [".git"] = true}};
     end
+    local Content = File:read "*a";
+    File:close();
 
-    return JSONLib.decode(File:read "*a");
+    return JSONLib.decode(Content);
 end
 
 RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
     local Log, NewLog = "";
     for File in FileSystemLib.dir(Name) do
         local CurrentFileExtension = GetFullExtension(File);
-        if IsDir(Name .. "/" .. File) then
-            local Children 				= {};
-            local TableToFill 			= {};
-            TableToFill.Properties 		= {Name = {0x1, GetName(File)}};
-            TableToFill.Name 			= GetName(File);
-            TableToFill.Children 		= Children;
-            if CurrentFileExtension == ".mod.lua" then
-                TableToFill.Type 		= "ModuleScript";
-                Log = Log .. RecursiveScanDir(Children, Name .. "/" .. File, TableToFill);
+        if not IgnoreRules.Extensions[CurrentFileExtension] and not IgnoreRules.Files[File] then
+            if IsDir(Name .. "/" .. File) then
+                local Children 				= {};
+                local TableToFill 			= {};
+                TableToFill.Properties 		= {Name = {0x1, GetName(File)}};
+                TableToFill.Name 			= GetName(File);
+                TableToFill.Children 		= Children;
+                if CurrentFileExtension == ".mod.lua" then
+                    TableToFill.Type 		= "ModuleScript";
+                    Log = Log .. RecursiveScanDir(Children, Name .. "/" .. File, TableToFill);
                 elseif CurrentFileExtension == ".loc.lua" then
                     TableToFill.Type 		= "LocalScript";
                     Log = Log .. RecursiveScanDir(Children, Name .. "/" .. File, TableToFill);
@@ -78,7 +82,9 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
 
                 table.insert(InstanceTree, TableToFill);
             else
-                local FileContent 	= io.open(Name .. "/" .. File, "r"):read("*all");
+                local Handle        = io.open(Name .. "/" .. File, "r");
+                local FileContent 	= Handle:read("*all");
+                Handle:close();
                 if UnderscoreTable and GetName(File) == "_" then
                     if CurrentFileExtension:find("%.lua") then
                         UnderscoreTable.Properties.Source = {0x1, FileContent};
@@ -102,7 +108,7 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
                         table.insert(InstanceTree, {Type = "LocalScript", Name = GetName(File), Children = {}, Properties = {Name = {0x1, GetName(File)}, Source = {0x1, FileContent}}});
                     elseif CurrentFileExtension == ".lua" then
                         table.insert(InstanceTree, {Type = "Script", Name = GetName(File), Children = {}, Properties = {Name = {0x1, GetName(File)}, Source = {0x1, FileContent}}});
-                    elseif not IgnoreRules.Extensions[CurrentFileExtension] and not IgnoreRules.Files[Name .. "/" .. File] then
+                    else
                         local Properties, NewLog;
                         if FileContent ~= "" then
                             Properties, NewLog	= SafeDecode(Name .. "/" .. File, FileContent);
@@ -111,17 +117,18 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
                         end
                         Log 		    		= Log .. NewLog;
                         Properties.Name  		= {0x1, GetName(File)};
-                        table.insert(InstanceTree, {Type = CurrentFileExtension:sub(2), Name = GetName(File), Children = {}, Properties = Properties});
+                    table.insert(InstanceTree, {Type = CurrentFileExtension:sub(2), Name = GetName(File), Children = {}, Properties = Properties});
                     end
                 end
             end
         end
+    end
     return Log;
 end
 
 function DirScanner.ScanDirectory(Name)
 	local InstanceTree 	= {};
-    IgnoreRules = ParseIgnoreRules(Name .. "/.valkyrie.conf");
+    IgnoreRules = ParseIgnoreRules(Name .. "/MainModule.mod.lua/.valkyrie.conf");
 	local Log = RecursiveScanDir(InstanceTree, Name);
 	return InstanceTree, Log;
 end

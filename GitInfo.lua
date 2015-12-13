@@ -3,12 +3,18 @@ local StringValueTemplate = [[{
     "Value": [1, "%s"]
 }]];
 
+local function Write(Name, Content)
+    local File = assert(io.open(Name, "w"));
+    File:write(Content);
+    File:close();
+end
+
 return function(BranchID, HeadCommitID, HeadCommitText, Author)
     local BaseDir = "branches/" .. BranchID .. "/MainModule.mod.lua/GitMeta/";
     lfs.mkdir(BaseDir);
     
-    assert(io.open(BaseDir .. "BranchID.StringValue", "w")):write(StringValueTemplate:format(BranchID));
-    io.open(BaseDir .. "HeadCommitID.StringValue", "w"):write(StringValueTemplate:format(HeadCommitID));
-    io.open(BaseDir .. "HeadCommitText.StringValue", "w"):write(StringValueTemplate:format(HeadCommitText));
-    io.open(BaseDir .. "Author.StringValue", "w"):write(StringValueTemplate:format(Author));
+    Write(BaseDir .. "BranchID.StringValue", StringValueTemplate:format(BranchID));
+    Write(BaseDir .. "HeadCommitID.StringValue", StringValueTemplate:format(HeadCommitID));
+    Write(BaseDir .. "HeadCommitText.StringValue", StringValueTemplate:format(HeadCommitText));
+    Write(BaseDir .. "Author.StringValue", StringValueTemplate:format(Author));
 end;

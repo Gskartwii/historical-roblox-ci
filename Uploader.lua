@@ -8,7 +8,6 @@ Upload = function(Data, ID, Name, SessionCookie, Force)
 		if Force then
 			error("ROBLOX LOGIN FAILED! Please contact gskw. Remember to include the time this happened at.");
 		end
-		print("Update .ROBLOSECURITY");
 		return Upload(Data, ID, Name, Login(), true);
 	end
 	return StripHeaders(Result);

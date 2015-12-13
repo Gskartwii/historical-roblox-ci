@@ -39,7 +39,9 @@ local function AttemptUpload(BranchID)
     local ModelID = ModelUploader(PotentialID or 0, BranchID);
 
     if not PotentialID then
-    	io.open("models.list", "a"):write(BranchID .. "\t" .. ModelID .. "\n");
+        local File = io.open("models.list", "a");
+    	File:write(BranchID .. "\t" .. ModelID .. "\n");
+        File:close();
     end
 
     return ModelID;
@@ -70,13 +72,19 @@ local function ReactToWebhook(RepoID, BranchID, BranchName, CommitID, CommitMess
 
     if not Success then
         GitHubStatus(CommitID, RepoID, "error", "The build failed due to an error in the CI", "https://gskw.dedyn.io:444/build_log/" .. CommitID);
-        io.open("build_logs/" .. CommitID .. ".log", "w"):write(Error);
+        local File = io.open("build_logs/" .. CommitID .. ".log", "w");
+        File:write(Error);
+        File:close();
         return {layout = false; render = "empty", content_type = "text/plain"; "ERROR: " .. Error};
     elseif BuildResult:find("\1") then
-        io.open("build_logs/" .. CommitID .. ".log", "w"):write(BuildResult);
+        local File = io.open("build_logs/" .. CommitID .. ".log", "w");
+        File:write(BuildResult);
+        File:close();
         GitHubStatus(CommitID, RepoID, "failure", "The build failed due to an error in the repository", "https://gskw.dedyn.io:444/build_log/" .. CommitID);
     else
-        io.open("build_logs/" .. CommitID .. ".log", "w"):write(BuildResult);
+        local File = io.open("build_logs/" .. CommitID .. ".log", "w");
+        File:write(BuildResult);
+        File:close();
         local ModelID = AttemptUpload(BranchID);
         GitHubStatus(CommitID, RepoID, "success", "The build succeeded", "https://gskw.dedyn.io:444/build_log/" .. CommitID);
     end
