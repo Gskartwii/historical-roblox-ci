@@ -54,9 +54,10 @@ end
 
 RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
     local Log, NewLog = "";
+    local LocalIgnoreRules = io.open(Name .. "/.valkyrie.conf") and ParseIgnoreRules(Name .. "/.valkyrie.conf") or IgnoreRules;
     for File in FileSystemLib.dir(Name) do
         local CurrentFileExtension = GetFullExtension(File);
-        if not IgnoreRules.Extensions[CurrentFileExtension] and not IgnoreRules.Files[File] then
+        if not LocalIgnoreRules.Extensions[CurrentFileExtension] and not LocalIgnoreRules.Files[File] then
             if IsDir(Name .. "/" .. File) then
                 local Children 				= {};
                 local TableToFill 			= {};
