@@ -60,6 +60,10 @@ end);
 
 local function ReactToWebhook(RepoID, BranchID, BranchName, CommitID, CommitMessage, CommitPusher)
     local BuildResult;
+    if io.open("locks/" .. CommitID, "r") then
+        return "This commit is currently being built!";
+    end
+    io.open("locks/" .. CommitID, "w"):close();
     GitHubStatus(CommitID, RepoID, "pending", "Currently building and upload your model");
 
     if BranchID:find("%.") or CommitID:find("%.") then
