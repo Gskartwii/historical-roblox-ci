@@ -8,6 +8,7 @@ local JSONModule = require("cjson");
 local GitHubStatus = require("GitHubStatus");
 local RobloxStatus = require("RobloxStatus");
 local ApplyGitInformation = require("GitInfo");
+local CopyLock = require "LockModel";
 
 Application:enable "etlua";
 
