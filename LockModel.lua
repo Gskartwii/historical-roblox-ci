@@ -35,7 +35,7 @@ return function(ID)
     local ModelsList = io.open("models.list", "w");
     for BranchName, BranchID in next, Models do
         if BranchID ~= ID then
-            ModelListParser:write(("%s\t%d\n"):format(BranchName, BranchID));
+            ModelsList:write(("%s\t%d\n"):format(BranchName, BranchID));
         end
     end
 end;
