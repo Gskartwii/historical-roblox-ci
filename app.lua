@@ -102,6 +102,7 @@ Application:post("/push_hook", function(Arguments)
     local Body = ngx.req.get_body_data();
 
     local ParsedBody    = JSONModule.decode(Body);
+    local RepoID        = ParsedBody.repository.full_name;
     local BranchID      = RepoID .. ParsedBody.ref:sub(11);
 
     if ParsedBody.deleted then
@@ -112,7 +113,6 @@ Application:post("/push_hook", function(Arguments)
         return {layout  = false; render = "empty"; content_type = "text/plain"; "Thanks."};
     end
 
-    local RepoID        = ParsedBody.repository.full_name;
     local BranchName    = ParsedBody.ref:sub(12);
     local CommitID      = ParsedBody.head_commit.id;
     local CommitMessage = ParsedBody.head_commit.message;
