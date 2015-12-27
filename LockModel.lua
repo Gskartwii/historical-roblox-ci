@@ -18,7 +18,7 @@ end
 local function DisownModel(ID, SessionCookie)
     local RealURL       = HTTPRequest("http://www.roblox.com/redirect-item?id=" .. ID, "", "Cookie: " .. SessionCookie .. "\n"):match "Location: (.-)\r\n";
     local CurrentState  = FindPostState(RealURL, SessionCookie);
-    local Result        = RunPostBack(RealURL, CurrentState, "ctl00_cphRoblox_btnDelete", {
+    local Result        = RunPostBack(RealURL, CurrentState, "ctl00$cphRoblox$btnDelete", {
         ["ctl00$cphRoblox$CommentsPane$NewCommentTextBox"]  = "Write a comment!",
         ["ctl00$cphRoblox$CreateSetPanel1$Name"]            = "",
         ["ctl00$cphRoblox$CreateSetPanel1$Description"]     = "",
