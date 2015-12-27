@@ -14,7 +14,7 @@ CopyLockModel = function(ID, SessionCookie)
                                         ["comments"]                                = "",
                                         ["rdoNotifications"]                        = "on",
                                       }, SessionCookie);
-    
+
     print(Result);
 end;
 
