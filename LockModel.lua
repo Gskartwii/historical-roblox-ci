@@ -24,11 +24,18 @@ local function DisownModel(ID, SessionCookie)
         ["ctl00$cphRoblox$CreateSetPanel1$Description"]     = "",
         ["ctl00$cphRoblox$CreateSetPanel1$Uploader"]        = ""
     }, SessionCookie);
-
-    print(Result);
 end
+
+local ModelListParser = require "ModelListParser";
 
 return function(ID)
     CopyLockModel(ID, io.open "session.cookie":read "*a");
     DisownModel(ID, io.open "session.cookie":read "*a");
+    local Models = ModelListParser();
+    local ModelsList = io.open("models.list", "w");
+    for BranchName, BranchID in next, Models do
+        if BranchID ~= ID then
+            ModelListParser:write(("%s\t%d\n"):format(BranchName, BranchID));
+        end
+    end
 end;
