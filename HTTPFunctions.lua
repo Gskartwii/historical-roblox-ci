@@ -87,7 +87,7 @@ end
 
 local FindPostState;
 FindPostState = function(URL, SessionCookie, Force)
-    local Result        = HTTPRequest(URL, "", "Cookie: " .. SessionCookie);
+    local Result        = HTTPRequest(URL, "", "Cookie: " .. SessionCookie .. "\n");
     if Result:match "/Login/Default.aspx" then
         if Force then
             error "ROBLOX LOGIN FAILED! Please contact gskw. Remember to include the time this happened at.";
