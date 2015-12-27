@@ -1,7 +1,6 @@
 local BuildRequest, HTTPRequestSSL, HTTPRequest, StripHeaders, Login, DataRequest, RunPostBack, FindPostState = unpack(require("HTTPFunctions"));
 
-local CopyLockModel;
-CopyLockModel = function(ID, SessionCookie)
+local function CopyLockModel(ID, SessionCookie)
     local CurrentState  = FindPostState("http://www.roblox.com/My/Item.aspx?ID=" .. ID, SessionCookie);
     local Result        = RunPostBack("http://www.roblox.com/My/Item.aspx?ID=" .. ID,
                                       CurrentState,
@@ -14,10 +13,22 @@ CopyLockModel = function(ID, SessionCookie)
                                         ["comments"]                                = "",
                                         ["rdoNotifications"]                        = "on",
                                       }, SessionCookie);
+end
+
+local function DisownModel(ID, SessionCookie)
+    local RealURL       = HTTPRequest("http://www.roblox.com/redirect-item?id=" .. ID, "", "Cookie: " .. SessionCookie .. "\n"):match "Location: (.-)\r\n";
+    local CurrentState  = FindPostState(RealURL, SessionCookie);
+    local Result        = RunPostBack(RealURL, CurrentState, "ctl00_cphRoblox_btnDelete", {
+        ["ctl00$cphRoblox$CommentsPane$NewCommentTextBox"]  = "Write a comment!",
+        ["ctl00$cphRoblox$CreateSetPanel1$Name"]            = "",
+        ["ctl00$cphRoblox$CreateSetPanel1$Description"]     = "",
+        ["ctl00$cphRoblox$CreateSetPanel1$Uploader"]        = ""
+    }, SessionCookie);
 
     print(Result);
-end;
+end
 
 return function(ID)
     CopyLockModel(ID, io.open "session.cookie":read "*a");
+    DisownModel(ID, io.open "session.cookie":read "*a");
 end;
