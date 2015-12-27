@@ -1,5 +1,6 @@
-local SSLWrapper = require "ssl";
-local Sockets = require "socket";
+local SSLWrapper    = require "ssl";
+local Sockets       = require "socket";
+local LapisUtil     = require "lapis.util";
 
 local function BuildRequest(URL, FormData, ExtraHeaders, Host)
 	local Request = "POST " .. URL .. " HTTP/1.1\n";
@@ -84,4 +85,42 @@ local function GetCSRF()
     return CSRFToken;
 end
 
-return {BuildRequest, HTTPRequestSSL, HTTPRequest, StripHeaders, Login, DataRequest};
+local FindPostState;
+FindPostState = function(URL, SessionCookie, Force)
+    local Result        = HTTPRequest(URL, "", "Cookie: " .. SessionCookie);
+    if Result:match "/Login/Default.aspx" then
+        if Force then
+            error "ROBLOX LOGIN FAILED! Please contact gskw. Remember to include the time this happened at.";
+        end
+        Result          = FindPostState(URL, Login(), true);
+    end
+
+    return StripHeaders(Result);
+end;
+
+local RunPostBack;
+RunPostBack = function(URL, CurrentState, Target, Overrides, SessionCookie, Force)
+    local ViewState     = CurrentState:match "id=\"__VIEWSTATE\" value=\"(.-)\"";
+    local VSGenerator   = CurrentState:match "id=\"__VIEWSTATEGENERATOR\" value=\"(.-)\"";
+    local PreviousPage  = CurrentState:match "id=\"__PREVIOUSPAGE\" value=\"(.-)\"";
+    local EvtValidation = CurrentState:match "id=\"__EVENTVALIDATION\" value=\"(.-)\"";
+    local EvtArgument   = CurrentState:match "id=\"__EVENTARGUMENT\" value=\"(.-)\"";
+
+    local Arguments     = {__VIEWSTATE = ViewState, __VIEWSTATEGENERATOR = VSGenerator, __PREVIOUSPAGE = PreviousPage, __EVENTVALIDATION = EvtValidation, __EVENTTARGET = Target};
+    for Key, Value in next, Overrides do
+        Arguments[Key]  = Value;
+    end
+
+    local Result        = HTTPRequest(URL, LapisUtil.encode_query_string(Arguments), "Content-Type: application/x-www-form-urlencoded\nCookie: " .. SessionCookie .. "\n");
+
+    if Result:match "/Login/Default.aspx" then
+        if Force then
+            error "ROBLOX LOGIN FAILED! Please contact gskw. Remember to include the time this happened at.";
+        end
+        return RunPostBack(URL, CurrentState, Target, Overrides, Login(), true);
+    end
+
+    return Result;
+end
+
+return {BuildRequest, HTTPRequestSSL, HTTPRequest, StripHeaders, Login, DataRequest, RunPostBack, FindPostState};
