@@ -72,9 +72,9 @@ local function ReactToWebhook(RepoID, BranchID, BranchName, CommitID, CommitMess
         return "Nice try. Very nice.";
     end
 
-    local Success, Error = pcall(function() BuildResult = AttemptBuild(RepoID, BranchID, BranchName); end);
-
     ApplyGitInformation(BranchID, CommitID, CommitMessage, CommitPusher);
+
+    local Success, Error = pcall(function() BuildResult = AttemptBuild(RepoID, BranchID, BranchName); end);
 
     if not Success then
         GitHubStatus(CommitID, RepoID, "error", "The build failed due to an error in the CI", "https://ci.crescentcode.net/build_log/" .. CommitID);
