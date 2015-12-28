@@ -1,7 +1,7 @@
 # Valkyrie CI system
 The Valkyrie CI system is a small [Lapis](http://leafo.net/lapis/) application that is invoked when the [Valkyrie Framework repository](https://github.com/ValkyrieRBXL/ValkyrieFramework) sends a push event through GitHub webhooks.
 
-When invoked, Valkyrie CI will attempt to pull/clone the changes, compile them into a Roblox RBXM model and upload it to Roblox. Here's [a list](https://rbxvalkyrie.dy.fi:444/models) of uploaded models' IDs.
+When invoked, Valkyrie CI will attempt to pull/clone the changes, compile them into a Roblox RBXM model and upload it to Roblox. Here's [a list](https://ci.crescentcode.net/models) of uploaded models' IDs.
 
 ## Credits
 Credits to:
