@@ -62,6 +62,10 @@ Application:get("/build/:User/:Repo/:Branch", function(Arguments)
 end);
 
 local function ReactToWebhook(RepoID, BranchID, BranchName, CommitID, CommitMessage, CommitPusher)
+	if BranchID:find("%.") or CommitID:find("%.") then
+        return "Nice try. Very nice.";
+    end
+
     local BuildResult;
     if io.open("locks/" .. CommitID, "r") then
         return "This commit is currently being built!";
@@ -69,14 +73,10 @@ local function ReactToWebhook(RepoID, BranchID, BranchName, CommitID, CommitMess
     io.open("locks/" .. CommitID, "w"):close();
     GitHubStatus(CommitID, RepoID, "pending", "Currently building and upload your model");
 
-    if BranchID:find("%.") or CommitID:find("%.") then
-        return "Nice try. Very nice.";
-    end
-
     local Success, Error = pcall(function() BuildResult = AttemptBuild(RepoID, BranchID, BranchName, CommitID, CommitMessage, CommitPusher); end);
 
     if not Success then
-        GitHubStatus(CommitID, RepoID, "error", "The build failed due to an error in the CI", "https://rbxvalkyrie.dy.fi:444/build_log/" .. CommitID);
+        GitHubStatus(CommitID, RepoID, "error", "The build failed due to an error in the CI", "https://ci.crescentcode.net/build_log/" .. CommitID);
         local File = io.open("build_logs/" .. CommitID .. ".log", "w");
         File:write(Error);
         File:close();
@@ -85,13 +85,13 @@ local function ReactToWebhook(RepoID, BranchID, BranchName, CommitID, CommitMess
         local File = io.open("build_logs/" .. CommitID .. ".log", "w");
         File:write(BuildResult);
         File:close();
-        GitHubStatus(CommitID, RepoID, "failure", "The build failed due to an error in the repository", "https://rbxvalkyrie.dy.fi:444/build_log/" .. CommitID);
+        GitHubStatus(CommitID, RepoID, "failure", "The build failed due to an error in the repository", "https://ci.crescentcode.net/build_log/" .. CommitID);
     else
         local File = io.open("build_logs/" .. CommitID .. ".log", "w");
         File:write(BuildResult);
         File:close();
         local ModelID = AttemptUpload(BranchID);
-        GitHubStatus(CommitID, RepoID, "success", "The build succeeded", "https://rbxvalkyrie.dy.fi:444/build_log/" .. CommitID);
+        GitHubStatus(CommitID, RepoID, "success", "The build succeeded", "https://ci.crescentcode.net/build_log/" .. CommitID);
     end
 
     return {layout = false; render = "empty"; content_type = "text/plain"; BuildResult};
