@@ -72,7 +72,7 @@ local function ReactToWebhook(RepoID, BranchID, BranchName, CommitID, CommitMess
     io.open("locks/" .. CommitID, "w"):close();
     GitHubStatus(CommitID, RepoID, "pending", "Currently building and upload your model");
 
-    ApplyGitInformation(BranchID, CommitID, CommitMessage, CommitPusher);
+    ApplyGitInformation(BranchID, CommitID, CommitMessage, CommitPusher); -- TODO: Will break if the branch has not yet been cloned
 
     local Success, Error = pcall(function() BuildResult = AttemptBuild(RepoID, BranchID, BranchName); end);
 
