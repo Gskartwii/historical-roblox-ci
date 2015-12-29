@@ -16,19 +16,20 @@ Application:get("/", function()
     return "Welcome to Lapis " .. require("lapis.version")
 end);
 
-local function AttemptBuild(RepoID, BranchID, BranchName)
+local function AttemptBuild(RepoID, BranchID, BranchName, CommitID, CommitMessage, CommitPusher)
     local ModelList = ModelListParser("models.list");
     local PotentialID = ModelList[BranchID];
     local Log = "";
     if not PotentialID then
     	PotentialID = 0;
 
-    	Log = Log .. ShellRun("mkdir -p", "branches/" .. BranchID .. "/MainModule.mod.lua", "builds/" .. RepoID, "build_logs/" .. BranchID);
+    	Log = Log .. ShellRun("mkdir -p", "branches/" .. BranchID .. "/MainModule.mod.lua", "builds/" .. RepoID);
     	Log = Log .. ShellRun("git clone", "https://github.com/" .. RepoID, "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "-b", BranchName);
     end
     Log = Log .. ShellRun("git -C", "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "reset --hard");
     Log = Log .. ShellRun("git -C", "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "pull");
     Log = Log .. ShellRun("git -C", "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "reset --hard");
+    ApplyGitInformation(BranchID, CommitID, CommitMessage, CommitPusher);
     Log = Log .. ModelBuilder("branches/" .. BranchID, "builds/" .. BranchID .. ".rbxm");
 
     return Log;
@@ -72,9 +73,7 @@ local function ReactToWebhook(RepoID, BranchID, BranchName, CommitID, CommitMess
         return "Nice try. Very nice.";
     end
 
-    local Success, Error = pcall(function() BuildResult = AttemptBuild(RepoID, BranchID, BranchName); end);
-
-    ApplyGitInformation(BranchID, CommitID, CommitMessage, CommitPusher);
+    local Success, Error = pcall(function() BuildResult = AttemptBuild(RepoID, BranchID, BranchName, CommitID, CommitMessage, CommitPusher); end);
 
     if not Success then
         GitHubStatus(CommitID, RepoID, "error", "The build failed due to an error in the CI", "https://rbxvalkyrie.dy.fi:444/build_log/" .. CommitID);
@@ -135,6 +134,39 @@ Application:post("/pull_hook", function(Arguments)
     local CommitPusher  = ParsedBody.user.login;
 
     return ReactToWebhook(RepoID, BranchID, BranchName, CommitID, CommitMessage, CommitPusher);
+end);
+
+Application:post("/test_patch/:Owner/:Branch", function(Arguments)
+    ngx.req.read_body();
+    local Patch         = ngx.req.get_body_data();
+    local Owner         = Arguments.params.Owner;
+    local Branch        = Arguments.params.Branch;
+
+    if Owner:find "%." or Branch:find "%." then
+        return "Patched this one, too!";
+    end
+
+    local Log = "";
+    if io.open("locks/patch-" .. Owner) then
+        return "A patch for this branch is currently being built!";
+    end
+    io.open("locks/patch-" .. Owner, "w"):close();
+    Log = Log .. ShellRun("mkdir -p", "branches/" .. Owner .. "/ValkyrieFramework/Patch/MainModule.mod.lua", "builds/" .. Owner .. "/ValkyrieFramework");
+    Log = Log .. ShellRun("git clone", "https://github.com/" .. Owner .. "/ValkyrieFramework", "branches/" .. Owner .. "/ValkyrieFramework/Patch/MainModule.mod.lua", ShellRaw "-b", Branch);
+
+    local TempFile      = os.tmpname();
+    local PatchFile     = io.open(TempFile, "w");
+    PatchFile:write(Patch);
+    PatchFile:close();
+
+    Log = Log .. ShellRun("git -C", "branches/" .. Owner .. "/ValkyrieFramework/Patch/MainModule.mod.lua", ShellRaw "apply", TempFile);
+    ApplyGitInformation(Owner .. "/ValkyrieFramework/Patch", "patch", "Command line testing patch", "Patchouli Bloxledge");
+
+    Log = Log .. ModelBuilder("branches/" .. Owner .. "/ValkyrieFramework/Patch", "builds/" .. Owner .. "/ValkyrieFramework/Patch.rbxm");
+    AttemptUpload(Owner .. "/ValkyrieFramework/Patch");
+    ShellRun("rm -rf", "locks/patch-" .. Owner, "branches/" .. Owner .. "/ValkyrieFramework/Patch");
+
+    return {layout = false; render = "empty"; content_type = "text/plain"; Log};
 end);
 
 
