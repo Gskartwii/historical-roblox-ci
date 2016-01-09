@@ -23,12 +23,12 @@ local function AttemptBuild(RepoID, BranchID, BranchName, CommitID, CommitMessag
     if not PotentialID then
     	PotentialID = 0;
 
-    	Log = Log .. ShellRun("mkdir -p", "branches/" .. BranchID .. "/MainModule.mod.lua", "builds/" .. RepoID);
-    	Log = Log .. ShellRun("git clone", "https://github.com/" .. RepoID, "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "-b", BranchName);
+    	Log = Log .. ShellRun("mkdir -p", "branches/" .. BranchID .. "/MainModule.mod.lua", "builds/" .. RepoID)
+            	  .. ShellRun("git clone", "https://github.com/" .. RepoID, "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "-b", BranchName);
     end
-    Log = Log .. ShellRun("git -C", "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "reset --hard");
-    Log = Log .. ShellRun("git -C", "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "pull");
-    Log = Log .. ShellRun("git -C", "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "reset --hard");
+    Log = Log .. ShellRun("git -C", "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "reset --hard")
+              .. ShellRun("git -C", "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "pull")
+              .. ShellRun("git -C", "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "reset --hard");
     ApplyGitInformation(BranchID, CommitID, CommitMessage, CommitPusher);
     Log = Log .. ModelBuilder("branches/" .. BranchID, "builds/" .. BranchID .. ".rbxm");
 
@@ -50,7 +50,7 @@ local function AttemptUpload(BranchID)
     return ModelID;
 end
 
-Application:get("/build/:User/:Repo/:Branch", function(Arguments)
+Application:get("b/uild/:User/:Repo/:Branch", function(Arguments)
     if Arguments.params.User:find("%.") or Arguments.params.Repo:find("%.") or Arguments.params.Branch:find("%.") then
     	return "Not enjoying this at all."
     end
@@ -180,6 +180,10 @@ end);
 
 Application:get("/models", function()
     return "<pre>" .. io.open("models.list"):read("*all"):gsub("\t(%d+)", "\t<a href='http://roblox.com/redirect-item?id=%1'>%1</a>") .. "</pre>";
+end);
+
+Application:get("/status/:branch", function(self)
+    return io.open("models.list"):read("*all"):match("/"..self.params.branch.."[^%d\n]*(%d*)");
 end);
 
 return Application;
