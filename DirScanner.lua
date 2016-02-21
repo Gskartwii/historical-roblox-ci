@@ -33,6 +33,7 @@ local function SafeDecode(Name, Content)
 
 	if not Success then
 		DecoderLog = DecoderLog .. "\1WARNING: Failed to decode " .. Name .. ": " .. Error .. "\n"; -- 0x1 = Warning indicator
+		print(Name, " DECODE ERROR !!!! ", Error);
 	end
 
 	return Return or {}, DecoderLog;
@@ -42,7 +43,6 @@ local IgnoreRules = {};
 
 local function ParseIgnoreRules(Name)
     local File, Err = io.open(Name, "r");
-    print("Parser", Err);
     if not File then
         return {Extensions = {[".md"] = true}, Files = {["."] = true, [".."] = true, [".git"] = true}};
     end
