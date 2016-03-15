@@ -54,7 +54,7 @@ local function AttemptUpload(BranchID)
     return ModelID;
 end
 
-Application:get("b/uild/:User/:Repo/:Branch", function(Arguments)
+Application:get("/build/:User/:Repo/:Branch", function(Arguments)
     if Arguments.params.User:find("%.") or Arguments.params.Repo:find("%.") or Arguments.params.Branch:find("%.") then
     	return "Not enjoying this at all."
     end
