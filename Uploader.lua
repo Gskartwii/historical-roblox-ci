@@ -4,7 +4,6 @@ local Upload;
 Upload = function(Data, ID, Name, SessionCookie, Force)
 	local Result = DataRequest("/Data/Upload.ashx?assetid=" .. ID .. "&type=Model&name=" .. Name  .. "&description=Valkyrie%20CI%20upload&genreTypeId=1&ispublic=True&allowComments=True",
 		Data, "Cookie: " .. SessionCookie .. "\nContent-Type: text/xml\n");
-        print(Result);
 	if Result:match("/RobloxDefaultErrorPage") then
 		if Force then
 			error("ROBLOX LOGIN FAILED! Please contact gskw. Remember to include the time this happened at.");
