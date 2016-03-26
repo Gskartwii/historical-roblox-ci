@@ -2,7 +2,7 @@ local BuildRequest, HTTPRequestSSL, HTTPRequest, StripHeaders, Login, DataReques
 local SetDescription = require "SetDescription";
 
 local function MakeDescription(BranchName, Payload)
-    local Owner = Payload.RepoID:match "^([a-zA-Z0-9%-]-)";
+    local Owner = Payload.RepoID:match "^([a-zA-Z0-9%-]+)";
     local Description =
         "Valkyrie CI upload\n"
      .. (Owner == "CrescentCode" and "Official Crescent Code model" or "UNOFFICIAL 3rd-party model") .. "\n"
