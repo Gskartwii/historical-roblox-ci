@@ -176,6 +176,16 @@ local function GeneratePROPSection(Table)
 		end
 	end
 
+    -- Valkyrie CI magic identifier
+    do
+        local PropertyName = "Magic";
+        UncompressedBuf = EncodedTypes.EncodeInt32LE(0); -- TypeID
+        UncompressedBuf = UncompressedBuf .. EncodedTypes.EncodeInt32LE(PropertyName:len()) .. PropertyName; -- Property name
+        local Data = "\21\32\43\42\56\49\40\36\30\2\8\30\38\50\42\54"; -- Valkyrie Magic identifier!
+        UncompressedBuf = UncompressedBuf .. "\1" .. EncodedTypes.EncodeInt32LE(Data:len()) .. Data;
+        Return = Return .. "PROP" .. EncodedTypes.CompressLZ4(UncompressedBuf);
+    end
+
 	return Return, Log;
 end
 
