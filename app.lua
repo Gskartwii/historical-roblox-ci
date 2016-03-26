@@ -39,11 +39,11 @@ local function AttemptBuild(RepoID, BranchID, BranchName, CommitID, CommitMessag
     return Log;
 end;
 
-local function AttemptUpload(BranchID)
+local function AttemptUpload(BranchID, Payload)
     local ModelList = ModelListParser("models.list");
     local PotentialID = ModelList[BranchID];
 
-    local ModelID = ModelUploader(PotentialID or 0, BranchID);
+    local ModelID = ModelUploader((PotentialID or 0), BranchID, Payload);
 
     if not PotentialID then
         local File = io.open("models.list", "a");
@@ -94,7 +94,7 @@ local function ReactToWebhook(RepoID, BranchID, BranchName, CommitID, CommitMess
         local File = io.open("build_logs/" .. CommitID .. ".log", "w");
         File:write(BuildResult);
         File:close();
-        local ModelID = AttemptUpload(BranchID);
+        local ModelID = AttemptUpload(BranchID, {RepoID = RepoID, BranchID = BranchID, BranchName = BranchName, CommitID = CommitID, CommitMessage = CommitMessage, CommitPusher = CommitPusher});
         GitHubStatus(CommitID, RepoID, "success", "The build succeeded", "https://ci.crescentcode.net/build_log/" .. CommitID);
     end
 
@@ -167,7 +167,7 @@ Application:post("/test_patch/:Owner/:Branch", function(Arguments)
     ApplyGitInformation(Owner .. "/ValkyrieFramework/Patch", "patch", "Command line testing patch", "Patchouli Bloxledge");
 
     Log = Log .. ModelBuilder("branches/" .. Owner .. "/ValkyrieFramework/Patch", "builds/" .. Owner .. "/ValkyrieFramework/Patch.rbxm");
-    AttemptUpload(Owner .. "/ValkyrieFramework/Patch");
+    AttemptUpload(Owner .. "/ValkyrieFramework/Patch", {RepoID = RepoID, BranchID = BranchID, BranchName = BranchName, CommitID = CommitID, CommitMessage = CommitMessage, CommitPusher = CommitPusher});
     ShellRun("rm -rf", "locks/patch-" .. Owner, "branches/" .. Owner .. "/ValkyrieFramework/Patch");
 
     return {layout = false; render = "empty"; content_type = "text/plain"; Log};
@@ -202,7 +202,6 @@ Application:post("/dl_patch/:Owner/:Repo/:Branch", function(Arguments)
 
     Log = Log .. ModelBuilder("branches/" .. Owner .. "/" .. Repo .. "/Patch", "builds/" .. Owner .. "/" .. Repo .. "/Patch.rbxm");
     ShellRun("rm -rf", "locks/patch-" .. Owner, "branches/" .. Owner .. "/" .. Repo .. "/Patch");
-    print(Log);
 
     return {layout = false; render = "empty"; content_type = "application/roblox-model"; io.open("builds/" .. Owner .. "/" .. Repo .. "/Patch.rbxm"):read "*a"};
 end);
