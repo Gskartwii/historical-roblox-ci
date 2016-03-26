@@ -167,7 +167,7 @@ Application:post("/test_patch/:Owner/:Branch", function(Arguments)
     ApplyGitInformation(Owner .. "/ValkyrieFramework/Patch", "patch", "Command line testing patch", "Patchouli Bloxledge");
 
     Log = Log .. ModelBuilder("branches/" .. Owner .. "/ValkyrieFramework/Patch", "builds/" .. Owner .. "/ValkyrieFramework/Patch.rbxm");
-    AttemptUpload(Owner .. "/ValkyrieFramework/Patch", {RepoID = RepoID, BranchID = BranchID, BranchName = BranchName, CommitID = CommitID, CommitMessage = CommitMessage, CommitPusher = CommitPusher});
+    AttemptUpload(Owner .. "/ValkyrieFramework/Patch", {RepoID = Owner .. "/ValkyrieFramework", BranchID = Owner .. "/ValkyrieFramework/Patch", BranchName = "Patch", CommitID = "patch", CommitMessage = "Command line testing patch", CommitPusher = "Patchouli Bloxledge"});
     ShellRun("rm -rf", "locks/patch-" .. Owner, "branches/" .. Owner .. "/ValkyrieFramework/Patch");
 
     return {layout = false; render = "empty"; content_type = "text/plain"; Log};
