@@ -39,7 +39,7 @@ return function(ID, BranchName, Payload)
     end
 	local ModelID = Upload(io.open("builds/" .. BranchName .. ".rbxm"):read("*all"), ID, ModelName, io.open("session.cookie", "r"):read("*all"));
 
-    SetDescription(ID, Description, io.open("session.cookie", "r"):read("*all"));
+    SetDescription(ID, ModelName, Description, io.open("session.cookie", "r"):read("*all"));
 
 	return ModelID;
 end;
