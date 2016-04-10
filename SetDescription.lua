@@ -1,8 +1,8 @@
 local BuildRequest, HTTPRequestSSL, HTTPRequest, StripHeaders, Login, DataRequest, RunPostBack, FindPostState = unpack(require("HTTPFunctions"));
 
 local function SetDescription(ID, Name, Description, SessionCookie)
-    local CurrentState  = FindPostState("http://www.roblox.com/My/Item.aspx?ID=" .. ID, SessionCookie);
-    local Result        = RunPostBack("http://www.roblox.com/My/Item.aspx?ID=" .. ID,
+    local CurrentState  = FindPostState("https://www.roblox.com/My/Item.aspx?ID=" .. ID, SessionCookie);
+    local Result        = RunPostBack("https://www.roblox.com/My/Item.aspx?ID=" .. ID,
                                       CurrentState,
                                       "ctl00$cphRoblox$SubmitButtonBottom", {
                                         ["ctl00$cphRoblox$NameTextBox"]             = Name,

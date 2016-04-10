@@ -1,8 +1,8 @@
 local BuildRequest, HTTPRequestSSL, HTTPRequest, StripHeaders, Login, DataRequest, RunPostBack, FindPostState = unpack(require("HTTPFunctions"));
 
 local function CopyLockModel(ID, SessionCookie)
-    local CurrentState  = FindPostState("http://www.roblox.com/My/Item.aspx?ID=" .. ID, SessionCookie);
-    local Result        = RunPostBack("http://www.roblox.com/My/Item.aspx?ID=" .. ID,
+    local CurrentState  = FindPostState("https://www.roblox.com/My/Item.aspx?ID=" .. ID, SessionCookie);
+    local Result        = RunPostBack("https://www.roblox.com/My/Item.aspx?ID=" .. ID,
                                       CurrentState,
                                       "ctl00$cphRoblox$SubmitButtonBottom", {
                                         ["ctl00$cphRoblox$NameTextBox"]             = "[DELETED]" .. CurrentState:match "name=\"ctl00$cphRoblox$NameTextBox\" type=\"text\" value=\"(.-)\"",
@@ -16,7 +16,7 @@ local function CopyLockModel(ID, SessionCookie)
 end
 
 local function DisownModel(ID, SessionCookie)
-    local RealURL       = HTTPRequest("http://www.roblox.com/redirect-item?id=" .. ID, "", "Cookie: " .. SessionCookie .. "\n"):match "Location: (.-)\r\n";
+    local RealURL       = HTTPRequest("https://www.roblox.com/redirect-item?id=" .. ID, "", "Cookie: " .. SessionCookie .. "\n"):match "Location: (.-)\r\n";
     local CurrentState  = FindPostState(RealURL, SessionCookie);
     local Result        = RunPostBack(RealURL, CurrentState, "ctl00$cphRoblox$btnDelete", {
         ["ctl00$cphRoblox$CommentsPane$NewCommentTextBox"]  = "Write a comment!",
