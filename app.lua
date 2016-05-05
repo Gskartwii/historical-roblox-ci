@@ -34,7 +34,8 @@ local function AttemptBuild(RepoID, BranchID, BranchName, CommitID, CommitMessag
               .. ShellRun("git -C", "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "submodule sync")
               .. ShellRun("git -C", "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "submodule update");
     ApplyGitInformation(BranchID, CommitID, CommitMessage, CommitPusher);
-    ShellRaw "moonc branches/" .. BranchID;
+    ShellRaw ("moonc branches/" .. BranchID);
+    ShellRaw ("rm -rf branches/" .. BranchID .. "/*.moon");
     Log = Log .. ModelBuilder("branches/" .. BranchID, "builds/" .. BranchID .. ".rbxm");
 
     return Log;
