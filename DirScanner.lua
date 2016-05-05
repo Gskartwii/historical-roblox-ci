@@ -89,7 +89,7 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable)
                 if UnderscoreTable and GetName(File) == "_" then
                     if CurrentFileExtension:find("%.lua") then
                         UnderscoreTable.Properties.Source = {0x1, FileContent};
-                    else
+                    elseif not CurrentFileExtension:find("%.moon") then
                         local Properties, NewLog;
                         if FileContent ~= "" then
                             Properties, NewLog	= SafeDecode(Name .. "/" .. File, FileContent);
