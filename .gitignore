@@ -20,3 +20,4 @@ GitHubToken.txt
 build_logs
 csrf.token
 locks
+config.lua
