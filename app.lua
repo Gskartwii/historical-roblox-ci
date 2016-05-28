@@ -34,6 +34,8 @@ local function AttemptBuild(RepoID, BranchID, BranchName, CommitID, CommitMessag
               .. ShellRun("git -C", "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "submodule sync")
               .. ShellRun("git -C", "branches/" .. BranchID .. "/MainModule.mod.lua", ShellRaw "submodule update");
     ApplyGitInformation(BranchID, CommitID, CommitMessage, CommitPusher);
+    ShellRun ("moonc", "branches/" .. BranchID);
+    ShellRun ("find", "branches/" .. BranchID, ShellRaw "-type f -name *.moon -exec rm {} +");
     Log = Log .. ModelBuilder("branches/" .. BranchID, "builds/" .. BranchID .. ".rbxm");
 
     return Log;
@@ -97,6 +99,8 @@ local function ReactToWebhook(RepoID, BranchID, BranchName, CommitID, CommitMess
         local ModelID = AttemptUpload(BranchID, {RepoID = RepoID, BranchID = BranchID, BranchName = BranchName, CommitID = CommitID, CommitMessage = CommitMessage, CommitPusher = CommitPusher});
         GitHubStatus(CommitID, RepoID, "success", "The build succeeded", "https://ci.crescentcode.net/build_log/" .. CommitID);
     end
+    
+    ShellRun("rm -rf", "locks/" .. CommitID);
 
     return {layout = false; render = "empty"; content_type = "text/plain"; BuildResult};
 end
