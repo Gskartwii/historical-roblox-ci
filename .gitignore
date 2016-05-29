@@ -10,7 +10,6 @@ Credientials.txt
 builds
 branches
 mime.types
-nginx.conf
 nginx.conf.compiled
 logs
 session.cookie
