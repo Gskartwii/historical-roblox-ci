@@ -3,9 +3,11 @@ Config("dev", {
 	port	= 556;
     servername = "cidev.crescentcode.net";
     user = "root root";
+    repo = "/root/dev/crescentdocs";
 });
 Config("prod", {
     port    = 456;
     servername = "ci.crescentcode.net";
     user = "root root";
+    repo = "/root/crescentdocs";
 });

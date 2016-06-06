@@ -9,11 +9,13 @@ local GitHubStatus = require("GitHubStatus");
 local RobloxStatus = require("RobloxStatus");
 local ApplyGitInformation = require("GitInfo");
 local CopyLock = require "LockModel";
+local Config = require "lapis.config".get();
+local json_params = require "lapis.application".json_params;
 
 Application:enable "etlua";
 
 Application:get("/", function()
-    return "Welcome to Lapis " .. require("lapis.version")
+    return "[CI] Welcome to Lapis " .. require("lapis.version")
 end);
 
 local function AttemptBuild(RepoID, BranchID, BranchName, CommitID, CommitMessage, CommitPusher)
@@ -201,9 +203,7 @@ Application:post("/dl_patch/:Owner/:Repo/:Branch", function(Arguments)
     PatchFile:write(Patch);
     PatchFile:close();
 
-    Log = Log .. ShellRun("git -C", "branches/" .. Owner .. "/" .. Repo .. "/Patch/MainModule.mod.lua", ShellRaw "apply", TempFile);
-    ApplyGitInformation(Owner .. "/" .. Repo .. "/Patch", "patch", "Command line testing patch", "Patchouli Bloxledge");
-
+    Log = Log .. ShellRun("git -C", "branches/" .. Owner .. "/" .. Repo .. "/Patch/MainModule.mod.lua", ShellRaw "apply", TempFile); ApplyGitInformation(Owner .. "/" .. Repo .. "/Patch", "patch", "Command line testing patch", "Patchouli Bloxledge"); 
     Log = Log .. ModelBuilder("branches/" .. Owner .. "/" .. Repo .. "/Patch", "builds/" .. Owner .. "/" .. Repo .. "/Patch.rbxm");
     ShellRun("rm -rf", "locks/patch-" .. Owner, "branches/" .. Owner .. "/" .. Repo .. "/Patch");
 
@@ -226,5 +226,19 @@ end);
 Application:get("/status/:branch", function(self)
     return io.open("models.list"):read("*all"):match("/"..self.params.branch.."[^%d\n]*(%d*)");
 end);
+
+
+Application:post("/docs_push_hook", json_params(function(Arguments)
+    local Remote = Config.remote or "origin";
+    local Branch = Config.branch or "master";
+    local Repo   = Config.repo;
+
+    if "refs/heads/" .. Branch ~= Arguments.params.ref then
+        return {content_type = "text/plain", layout = false, "This is not my branch!"};
+    end
+
+    ShellRun("git -C", Repo, ShellRaw "pull", Remote, Branch);
+    return {content_type = "text/plain", layout = false, ShellRun("(cd " .. Repo .. "; ./buildsite.sh)")};
+end));
 
 return Application;
