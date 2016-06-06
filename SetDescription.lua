@@ -8,7 +8,7 @@ local function SetDescription(ID, Name, Description, SessionCookie)
                                         ["ctl00$cphRoblox$NameTextBox"]             = Name,
                                         ["ctl00$cphRoblox$DescriptionTextBox"]      = Description,
                                         ["ctl00$cphRoblox$EnableCommentsCheckBox"]  = "on",
-                                        ["ctl00_cphRoblox_PublicDomainCheckBox"]    = "true";
+                                        ["ctl00_cphRoblox_PublicDomainCheckBox"]    = "on";
                                         ["GenreButtons2"]                           = 1,
                                         ["ctl00$cphRoblox$actualGenreSelection"]    = 1,
                                         ["comments"]                                = "",
