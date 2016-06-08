@@ -16,12 +16,12 @@ local function BuildRequest(URL, FormData, ExtraHeaders, Host)
 end
 
 local function HTTPRequestSSL(URL, FormData, ExtraHeaders)
-	local Socket = Sockets.tcp();
-	Socket:connect("www.roblox.com", 443);
-	Socket = SSLWrapper.wrap(Socket, {mode = "client", protocol = "tlsv1"});
-	Socket:dohandshake();
-	Socket:send(BuildRequest(URL, FormData, ExtraHeaders));
-	local Response = Socket:receive("*a");
+	local Socket = assert(Sockets.tcp());
+	assert(Socket:connect("www.roblox.com", 443));
+	Socket = assert(SSLWrapper.wrap(Socket, {mode = "client", protocol = "tlsv1_2"}));
+	assert(Socket:dohandshake());
+	assert(Socket:send(BuildRequest(URL, FormData, ExtraHeaders)));
+	local Response = assert(Socket:receive("*a"));
 	Socket:close();
 	return Response;
 end
@@ -38,23 +38,23 @@ end]]
 local HTTPRequest = HTTPRequestSSL;
 
 local function HTTPGet(URL, ExtraHead)
-    local Socket = Sockets.tcp();
-    Socket:connect("www.roblox.com", 443);
-	Socket = SSLWrapper.wrap(Socket, {mode = "client", protocol = "tlsv1"});
-	Socket:dohandshake();
-    Socket:send(BuildRequest(URL, "", ExtraHead):gsub("POST", "GET")); -- lol
-    local Response = Socket:receive("*a");
+    local Socket = assert(Sockets.tcp());
+    assert(Socket:connect("www.roblox.com", 443));
+	Socket = assert(SSLWrapper.wrap(Socket, {mode = "client", protocol = "tlsv1_2"}));
+	assert(Socket:dohandshake());
+    assert(Socket:send(BuildRequest(URL, "", ExtraHead):gsub("POST", "GET"))); -- lol
+    local Response = assert(Socket:receive("*a"));
     Socket:close();
     return Response;
 end
 
 local function DataRequest(URL, FormData, ExtraHeaders)
-	local Socket = Sockets.tcp();
-	Socket:connect("data.roblox.com", 443);
-	Socket = SSLWrapper.wrap(Socket, {mode = "client", protocol = "tlsv1"});
-	Socket:dohandshake();
-	Socket:send(BuildRequest(URL, FormData, ExtraHeaders, "data.roblox.com"));
-	local Response = Socket:receive("*a");
+	local Socket = assert(Sockets.tcp());
+	assert(Socket:connect("data.roblox.com", 443));
+	Socket = assert(SSLWrapper.wrap(Socket, {mode = "client", protocol = "tlsv1_2"}));
+	assert(Socket:dohandshake());
+	assert(Socket:send(BuildRequest(URL, FormData, ExtraHeaders, "data.roblox.com")));
+	local Response = assert(Socket:receive("*a"));
     Socket:close();
     return Response;
 end
