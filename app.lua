@@ -219,7 +219,7 @@ Application:get("/build_log/:CommitID", function(Arguments)
 end);
 
 Application:get("/models", function()
-    return "<pre>" .. io.open("models.list"):read("*all"):gsub("\t(%d+)", "\t<a href='http://roblox.com/redirect-item?id=%1'>%1</a>") .. "</pre>";
+    return "<pre>" .. io.open("models.list"):read("*all"):gsub("\t(%d+)", "\t<a href='https://roblox.com/redirect-item?id=%1'>%1</a>") .. "</pre>";
 end);
 
 Application:get("/status/:branch", function(self)
