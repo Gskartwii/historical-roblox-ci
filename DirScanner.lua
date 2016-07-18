@@ -50,13 +50,26 @@ local function ParseRules(Name)
     return JSONLib.decode(Content);
 end
 
+local AlwaysIgnore = {
+    Extensions = {};
+    Files = {
+        ["project.conf"] = true;
+        ["."] = true;
+        [".."] = true;
+        [".git"] = true;
+        [".gitignore"] = true;
+        [".gitmodules"] = true;
+        [".gitattributes"] = true;
+    }
+};
+
 RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable, Rules)
     local Log, NewLog = "";
-    local IsLocalRules = io.open(Name .. "/.valkyrie.conf");
-    local Rules = IsLocalRules and ParseRules(Name .. "/.valkyrie.conf") or Rules;
+    local IsLocalRules = io.open(Name .. "/project.conf");
+    local Rules = IsLocalRules and ParseRules(Name .. "/project.conf") or Rules;
     for File in FileSystemLib.dir(Name) do
         local CurrentFileExtension = GetFullExtension(File);
-        if not Rules.Extensions[CurrentFileExtension] and not Rules.Files[File] then
+        if not Rules.Extensions[CurrentFileExtension] and not Rules.Files[File] and not AlwaysIgnore.Extensions[CurrentFileExtension] and not AlwaysIgnore.Files[File] then
             if IsDir(Name .. "/" .. File) then
                 local Children 				= {};
                 local TableToFill 			= {};
@@ -99,12 +112,6 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable, Rules)
                         Properties.Name 		= UnderscoreTable.Properties.Name;
                         UnderscoreTable.Properties = Properties;
                     end
-                    if IsLocalRules then
-                        if Rules.RootOverride then
-                            UnderscoreTable.Properties.Name[2] = Rules.RootOverride.Name or UnderscoreTable.Properties.Name;
-                            UnderscoreTable.Type = Rules.RootOverride.Type or UnderscoreTable.Type;
-                        end
-                    end
                 else
                     if CurrentFileExtension == nil then
                         Log = Log .. "\1WARNING: No file extension: " .. Name .. "/" .. File;
@@ -133,9 +140,22 @@ RecursiveScanDir = function(InstanceTree, Name, UnderscoreTable, Rules)
 end
 
 function DirScanner.ScanDirectory(Name)
-	local InstanceTree 	= {};
-    Rules = ParseRules(Name .. "/MainModule.mod.lua/.valkyrie.conf");
-	local Log = RecursiveScanDir(InstanceTree, Name, nil, Rules);
+	local InstanceTree, Log 	= {}, "";
+    Rules = ParseRules(Name .. "/MainModule.mod.lua/project.conf");
+
+    if not Rules.RootMode or Rules.RootMode == "Legacy" then
+        local RootName = "MainModule";
+        local RootType = "ModuleScript";
+
+        if Rules.RootOverride then
+            RootName = Rules.RootOverride.Name or RootName;
+            RootType = Rules.RootOverride.Type or RootType;
+        end
+
+        Log = RecursiveScanDir(InstanceTree, Name .. "/MainModule.mod.lua", {Name = RootName, Type = RootType, Children = {}, Properties = {Name = {0x1, RootName}}}, Rules);
+    elseif Rules.RootMode == "MultiRoot" then
+        Log = RecursiveScanDir(InstanceTree, Name .. "/MainModule.mod.lua", nil, Rules);
+    end
 	return InstanceTree, Log;
 end
 
