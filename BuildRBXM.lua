@@ -34,6 +34,10 @@ local function GetInstancesOfType(Table, Type)
 	return Instances;
 end
 
+local function IsTypeInternal(Table, Type)
+    return Table.Rules and Table.Rules.InternalTypes and Table.Rules.InternalTypes[Type];
+end
+
 local function GenerateINSTHeader(Table)
 	local Return 			= "";
 	local UncompressedBuf	;
@@ -41,12 +45,15 @@ local function GenerateINSTHeader(Table)
 		local Type 			= Table.Types[i + 1];
 		UncompressedBuf 	= EncodedTypes.EncodeInt32LE(i); -- Type ID
 		UncompressedBuf		= UncompressedBuf .. EncodedTypes.EncodeInt32LE(Type:len()) .. Type;
-		UncompressedBuf 	= UncompressedBuf .. "\0"; -- No extra data
+		UncompressedBuf 	= UncompressedBuf .. (IsTypeInternal(Table, Type) and "\1" or "\0");
 
 		local Referents 	= FindInstanceReferents(Table.Instances, Type);
 
 		UncompressedBuf 	= UncompressedBuf .. EncodedTypes.EncodeInt32LE(#Referents); -- Array length
 		UncompressedBuf		= UncompressedBuf .. EncodedTypes.EncodeInterleavedInt32BE(Referents); -- Referent array
+        if IsTypeInternal(Table, Type) then
+            UncompressedBuf = UncompressedBuf .. ("\1"):rep(#Referents);
+        end
 
 		Return 				= Return .. "INST" .. EncodedTypes.CompressLZ4(UncompressedBuf);
 	end

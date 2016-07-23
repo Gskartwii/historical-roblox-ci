@@ -154,6 +154,7 @@ function DirScanner.ScanDirectory(Name)
 
         Log = RecursiveScanDir(InstanceTree, Name .. "/MainModule.mod.lua", {Name = RootName, Type = RootType, Children = {}, Properties = {Name = {0x1, RootName}}}, Rules);
     elseif Rules.RootMode == "MultiRoot" then
+        InstanceTree.Rules = Rules;
         Log = RecursiveScanDir(InstanceTree, Name .. "/MainModule.mod.lua", nil, Rules);
     end
 	return InstanceTree, Log;

@@ -37,6 +37,7 @@ function TableFormatter.FormatTable(Table)
 	Formatted.Types 			= GetTypes(Formatted.Instances);
 	Formatted.UniqueTypes		= #Formatted.Types;
 	Formatted.UniqueInstances	= #Formatted.Instances;
+    Formatted.Rules             = Table.Rules;
 
 	return Formatted;
 end
